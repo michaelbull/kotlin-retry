@@ -17,8 +17,14 @@ inline class RetryInstruction @PublishedApi internal constructor(
 val StopRetrying = RetryInstruction(-1L)
 
 /**
+ * Instructs the [retry] function to continue attempting.
+ */
+val ContinueRetrying = RetryInstruction(0L)
+
+/**
  * Instructs the [retry] function to retry the operation immediately.
  */
+@Deprecated("Use ContinueRetrying instead", ReplaceWith("ContinueRetrying"))
 val RetryImmediately = RetryInstruction(0L)
 
 /**

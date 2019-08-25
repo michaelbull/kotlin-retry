@@ -1,7 +1,7 @@
 package com.github.michaelbull.retry.policy
 
+import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.RetryAfter
-import com.github.michaelbull.retry.RetryImmediately
 import com.github.michaelbull.retry.RetryInstruction
 import com.github.michaelbull.retry.StopRetrying
 import kotlin.math.min
@@ -30,7 +30,7 @@ fun <E> RetryPolicy<E>.maxDelay(delayMillis: Long): RetryPolicy<E> {
     return {
         val instruction = this.(this@maxDelay)()
 
-        if (instruction == StopRetrying || instruction == RetryImmediately) {
+        if (instruction == StopRetrying || instruction == ContinueRetrying) {
             instruction
         } else {
             RetryAfter(min(instruction.delayMillis, delayMillis))

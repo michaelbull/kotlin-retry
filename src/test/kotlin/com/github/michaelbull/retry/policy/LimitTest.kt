@@ -1,7 +1,7 @@
 package com.github.michaelbull.retry.policy
 
+import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.RetryFailure
-import com.github.michaelbull.retry.RetryImmediately
 import com.github.michaelbull.retry.StopRetrying
 import com.github.michaelbull.retry.context.RetryStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,7 +19,7 @@ class LimitTest {
         runBlockingTest(RetryStatus()) {
             val policy = limitAttempts(5)
             val instruction = failure.policy()
-            assertEquals(RetryImmediately, instruction)
+            assertEquals(ContinueRetrying, instruction)
         }
     }
 
@@ -46,7 +46,7 @@ class LimitTest {
         runBlockingTest(RetryStatus()) {
             val policy = limitAttempts(5)
             val instruction = failure.policy()
-            assertEquals(RetryImmediately, instruction)
+            assertEquals(ContinueRetrying, instruction)
         }
     }
 

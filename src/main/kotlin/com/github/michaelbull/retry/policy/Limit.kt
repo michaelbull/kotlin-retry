@@ -1,7 +1,7 @@
 package com.github.michaelbull.retry.policy
 
+import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.RetryAfter
-import com.github.michaelbull.retry.RetryImmediately
 import com.github.michaelbull.retry.RetryInstruction
 import com.github.michaelbull.retry.StopRetrying
 import com.github.michaelbull.retry.context.RetryStatus
@@ -23,7 +23,7 @@ fun limitAttempts(limit: Int): RetryPolicy<*> {
         if (attempt + 1 >= limit) {
             StopRetrying
         } else {
-            RetryImmediately
+            ContinueRetrying
         }
     }
 }
@@ -40,7 +40,7 @@ fun <E> RetryPolicy<E>.limitByDelay(delayMillis: Long): RetryPolicy<E> {
     return {
         val instruction = this.(this@limitByDelay)()
 
-        if (instruction == StopRetrying || instruction == RetryImmediately) {
+        if (instruction == StopRetrying || instruction == ContinueRetrying) {
             instruction
         } else if (instruction.delayMillis >= delayMillis) {
             StopRetrying
@@ -62,7 +62,7 @@ fun <E> RetryPolicy<E>.limitByCumulativeDelay(delayMillis: Long): RetryPolicy<E>
     return {
         val instruction = this.(this@limitByCumulativeDelay)()
 
-        if (instruction == StopRetrying || instruction == RetryImmediately) {
+        if (instruction == StopRetrying || instruction == ContinueRetrying) {
             instruction
         } else {
             val cumulativeDelay = coroutineContext.retryStatus.cumulativeDelay

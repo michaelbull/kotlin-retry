@@ -61,7 +61,7 @@ retrying and stopping after 5 total attempts.
 
 ```kotlin
 val retryTimeouts: RetryPolicy<Throwable> = {
-    if (reason is SQLDataException) RetryImmediately else StopRetrying
+    if (reason is SQLDataException) ContinueRetrying else StopRetrying
 }
 
 suspend fun printExchangeBetween(a: Long, b: Long) {

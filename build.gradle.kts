@@ -65,13 +65,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    description = "Assembles a jar archive containing the main classes with sources."
-    archiveClassifier.set("sources")
-    from(project.the<SourceSetContainer>().getByName("main").allSource)
-}
-
 val dokka by tasks.existing(DokkaTask::class) {
     sourceDirs = project.the<SourceSetContainer>().getByName("main").kotlin.srcDirs
     outputFormat = "javadoc"
@@ -85,6 +78,13 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
     dependsOn(dokka)
     from(dokka.get().outputDirectory)
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Assembles a jar archive containing the main classes with sources."
+    archiveClassifier.set("sources")
+    from(project.the<SourceSetContainer>().getByName("main").allSource)
 }
 
 publishing {

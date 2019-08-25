@@ -47,7 +47,7 @@ suspend fun <V, E> retryResult(
                 if (instruction == StopRetrying) {
                     mostRecentFailure = result
                     break
-                } else if (instruction == RetryImmediately) {
+                } else if (instruction == ContinueRetrying) {
                     status.previousDelay = 0
                     continue
                 } else {

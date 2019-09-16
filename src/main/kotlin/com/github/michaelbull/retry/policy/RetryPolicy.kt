@@ -1,5 +1,6 @@
 package com.github.michaelbull.retry.policy
 
+import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.RetryAfter
 import com.github.michaelbull.retry.RetryFailure
 import com.github.michaelbull.retry.RetryInstruction
@@ -28,9 +29,9 @@ operator fun <E> RetryPolicy<E>.plus(other: RetryPolicy<E>): RetryPolicy<E> = {
     val a = this@plus(this)
     val b = other(this)
 
-    if (a == StopRetrying || b == StopRetrying) {
-        StopRetrying
-    } else {
-        RetryAfter(max(a.delayMillis, b.delayMillis))
+    when {
+        a == StopRetrying || b == StopRetrying -> StopRetrying
+        a == ContinueRetrying && b == ContinueRetrying -> ContinueRetrying
+        else -> RetryAfter(max(a.delayMillis, b.delayMillis))
     }
 }

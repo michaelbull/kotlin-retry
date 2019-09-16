@@ -131,4 +131,26 @@ class RetryTest {
             dispatcher.scheduleResumeAfterDelay(4000, any())
         }
     }
+
+    @Test
+    fun `retry should adhere to custom policy`() = runBlockingTest {
+        val policy: RetryPolicy<Throwable> = {
+            if (reason is AttemptsException) ContinueRetrying else StopRetrying
+        }
+
+        var attempts = 0
+        lateinit var mostRecentException: Exception
+
+        try {
+            @Suppress("IMPLICIT_NOTHING_AS_TYPE_PARAMETER")
+            retry(policy + limitAttempts(15)) {
+                attempts++
+                throw AttemptsException(attempts)
+            }
+        } catch (ex: AttemptsException) {
+            mostRecentException = ex
+        }
+
+        assertEquals(AttemptsException(15), mostRecentException)
+    }
 }

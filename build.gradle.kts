@@ -15,7 +15,7 @@ fun BintrayExtension.pkg(configure: BintrayExtension.PackageConfig.() -> Unit) {
 plugins {
     `maven-publish`
     kotlin("jvm") version ("1.3.50")
-    id("com.github.ben-manes.versions") version ("0.22.0")
+    id("com.github.ben-manes.versions") version ("0.25.0")
     id("com.jfrog.bintray") version ("1.8.4")
     id("org.jetbrains.dokka") version ("0.9.18")
     id("net.researchgate.release") version ("2.8.1")
@@ -30,25 +30,17 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0")
-    testImplementation(enforcedPlatform("org.junit:junit-bom:5.5.1"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1")
+    testImplementation(enforcedPlatform("org.junit:junit-bom:5.5.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.1")
     testImplementation("io.mockk:mockk:1.9.3")
 }
 
-tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
-    resolutionStrategy {
-        componentSelection {
-            all {
-                val rejected = listOf("alpha", "beta", "rc", "cr", "m", "eap").any {
-                    candidate.version.contains(it, ignoreCase = true)
-                }
-
-                if (rejected) {
-                    reject("Release candidate")
-                }
-            }
+tasks.withType<DependencyUpdatesTask> {
+    rejectVersionIf {
+        listOf("alpha", "beta", "rc", "cr", "m", "eap", "pr").any {
+            candidate.version.contains(it, ignoreCase = true)
         }
     }
 }

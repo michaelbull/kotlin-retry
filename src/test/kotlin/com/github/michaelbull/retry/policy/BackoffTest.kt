@@ -21,10 +21,11 @@ import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
 class BackoffTest {
-    private val exponential = binaryExponentialBackoff(base = 10, max = 8000)
-    private val fullJitter = fullJitterBackoff(base = 10, max = 8000)
-    private val equalJitter = equalJitterBackoff(base = 10, max = 8000)
-    private val decorrelatedJitter = decorrelatedJitterBackoff(base = 10, max = 8000)
+
+    private val exponential = binaryExponentialBackoff(10L..8000L)
+    private val fullJitter = fullJitterBackoff(10L..8000L)
+    private val equalJitter = equalJitterBackoff(10L..8000L)
+    private val decorrelatedJitter = decorrelatedJitterBackoff(10L..8000L)
 
     private val random = mockk<Random>(relaxed = true).apply {
         every { nextLong(any()) } answers { firstArg<Long>() - 1 }

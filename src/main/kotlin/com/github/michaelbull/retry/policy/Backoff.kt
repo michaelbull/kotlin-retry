@@ -32,6 +32,11 @@ fun binaryExponentialBackoff(base: Long, max: Long): RetryPolicy<*> {
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun binaryExponentialBackoff(range: LongRange): RetryPolicy<*> {
+    return binaryExponentialBackoff(range.first, range.last)
+}
+
 /**
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to
  * [RetryAfter] a random amount of milliseconds between 0 and [max] inclusive,
@@ -51,6 +56,11 @@ fun fullJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
 
         RetryAfter(randomDelay)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun fullJitterBackoff(range: LongRange): RetryPolicy<*> {
+    return fullJitterBackoff(range.first, range.last)
 }
 
 /**
@@ -76,6 +86,11 @@ fun equalJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun equalJitterBackoff(range: LongRange): RetryPolicy<*> {
+    return equalJitterBackoff(range.first, range.last)
+}
+
 /**
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to
  * [RetryAfter] a random amount of milliseconds between [base] and [max]
@@ -95,4 +110,9 @@ fun decorrelatedJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
 
         RetryAfter(randomDelay)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun decorrelatedJitterBackoff(range: LongRange): RetryPolicy<*> {
+    return decorrelatedJitterBackoff(range.first, range.last)
 }

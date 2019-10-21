@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.michael-bull.kotlin-retry:kotlin-retry:1.0.1'
+    compile 'com.michael-bull.kotlin-retry:kotlin-retry:1.0.3'
 }
 ```
 

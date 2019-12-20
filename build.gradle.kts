@@ -14,11 +14,11 @@ fun BintrayExtension.pkg(configure: BintrayExtension.PackageConfig.() -> Unit) {
 
 plugins {
     `maven-publish`
-    kotlin("jvm") version ("1.3.50")
-    id("com.github.ben-manes.versions") version ("0.25.0")
-    id("com.jfrog.bintray") version ("1.8.4")
-    id("org.jetbrains.dokka") version ("0.9.18")
-    id("net.researchgate.release") version ("2.8.1")
+    kotlin("jvm") version "1.3.61"
+    id("com.github.ben-manes.versions") version "0.27.0"
+    id("com.jfrog.bintray") version "1.8.4"
+    id("org.jetbrains.dokka") version "0.10.0"
+    id("net.researchgate.release") version "2.8.1"
 }
 
 repositories {
@@ -29,11 +29,10 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1")
-    testImplementation(enforcedPlatform("org.junit:junit-bom:5.5.2"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.1")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.3")
     testImplementation("io.mockk:mockk:1.9.3")
 }
 
@@ -58,10 +57,8 @@ tasks.withType<Test> {
 }
 
 val dokka by tasks.existing(DokkaTask::class) {
-    sourceDirs = project.the<SourceSetContainer>().getByName("main").kotlin.srcDirs
     outputFormat = "javadoc"
     outputDirectory = "$buildDir/docs/javadoc"
-    kotlinTasks(::defaultKotlinTasks)
 }
 
 val javadocJar by tasks.registering(Jar::class) {

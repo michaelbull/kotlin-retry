@@ -1,6 +1,6 @@
 # kotlin-retry
 
-[![Release](https://api.bintray.com/packages/michaelbull/maven/kotlin-retry/images/download.svg)](https://bintray.com/michaelbull/maven/kotlin-retry/_latestVersion) [![Build Status](https://travis-ci.org/michaelbull/kotlin-retry.svg?branch=master)](https://travis-ci.org/michaelbull/kotlin-retry) [![License](https://img.shields.io/github/license/michaelbull/kotlin-retry.svg)](https://github.com/michaelbull/kotlin-retry/blob/master/LICENSE)
+[![Release](https://api.bintray.com/packages/michaelbull/maven/kotlin-retry/images/download.svg)](https://bintray.com/michaelbull/maven/kotlin-retry/_latestVersion) [![CI Status](https://github.com/michaelbull/kotlin-retry/workflows/ci/badge.svg)](https://github.com/michaelbull/kotlin-retry/actions?query=workflow%3Aci) [![License](https://img.shields.io/github/license/michaelbull/kotlin-retry.svg)](https://github.com/michaelbull/kotlin-retry/blob/master/LICENSE)
 
 [`retry`][retry] is a higher-order function for retrying operations that may fail.
 
@@ -24,14 +24,14 @@ dependencies {
 
 ## Introduction
 
-IO operations often experience temporary failures that warrant re-execution, 
+IO operations often experience temporary failures that warrant re-execution,
 e.g. a database transaction that may fail due to a deadlock.<sup>[[1]][innodb-deadlocks][[2]][postgres-deadlocks]</sup>
 
 > _“even if your application logic is correct, you must still handle the case
 >  where a transaction must be retried”_
 >
-> — _[Deadlocks in InnoDB][innodb-deadlocks]_ 
- 
+> — _[Deadlocks in InnoDB][innodb-deadlocks]_
+
 The [`retry`][retry] function simplifies this process by wrapping the
 application logic and applying a specified [`RetryPolicy`][retry-policy].
 
@@ -48,7 +48,7 @@ suspend fun printExchangeBetween(a: Long, b: Long) {
 }
 
 fun main() = runBlocking {
-    retry(limitAttempts(5)) { 
+    retry(limitAttempts(5)) {
         printExchangeBetween(1L, 2L)
     }
 }
@@ -71,7 +71,7 @@ suspend fun printExchangeBetween(a: Long, b: Long) {
 }
 
 fun main() = runBlocking {
-    retry(retryTimeouts + limitAttempts(5) + constantDelay(20)) { 
+    retry(retryTimeouts + limitAttempts(5) + constantDelay(20)) {
         printExchangeBetween(1L, 2L)
     }
 }

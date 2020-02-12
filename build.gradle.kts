@@ -15,23 +15,22 @@ fun BintrayExtension.pkg(configure: BintrayExtension.PackageConfig.() -> Unit) {
 plugins {
     `maven-publish`
     kotlin("jvm") version "1.3.61"
-    id("com.github.ben-manes.versions") version "0.27.0"
     id("com.jfrog.bintray") version "1.8.4"
-    id("org.jetbrains.dokka") version "0.10.0"
+    id("org.jetbrains.dokka") version "0.10.1"
+    id("com.github.ben-manes.versions") version "0.27.0"
     id("net.researchgate.release") version "2.8.1"
 }
 
 repositories {
     mavenCentral()
     jcenter()
-    maven(url = "https://dl.bintray.com/michaelbull/maven")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.4")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.6")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.3")
     testImplementation("io.mockk:mockk:1.9.3")
 }

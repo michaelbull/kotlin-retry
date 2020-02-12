@@ -1,6 +1,6 @@
 # kotlin-retry
 
-[![Release](https://api.bintray.com/packages/michaelbull/maven/kotlin-retry/images/download.svg)](https://bintray.com/michaelbull/maven/kotlin-retry/_latestVersion) [![CI Status](https://github.com/michaelbull/kotlin-retry/workflows/ci/badge.svg)](https://github.com/michaelbull/kotlin-retry/actions?query=workflow%3Aci) [![License](https://img.shields.io/github/license/michaelbull/kotlin-retry.svg)](https://github.com/michaelbull/kotlin-retry/blob/master/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/com.michael-bull.kotlin-retry/kotlin-retry.svg)](https://search.maven.org/search?q=g:com.michael-bull.kotlin-retry) [![CI Status](https://github.com/michaelbull/kotlin-retry/workflows/ci/badge.svg)](https://github.com/michaelbull/kotlin-retry/actions?query=workflow%3Aci) [![License](https://img.shields.io/github/license/michaelbull/kotlin-retry.svg)](https://github.com/michaelbull/kotlin-retry/blob/master/LICENSE)
 
 [`retry`][retry] is a higher-order function for retrying operations that may fail.
 
@@ -14,11 +14,11 @@ retry(limitAttempts(10) + constantDelay(delayMillis = 50L)) {
 
 ```groovy
 repositories {
-    maven { url = 'https://dl.bintray.com/michaelbull/maven' }
+    mavenCentral()
 }
 
 dependencies {
-    compile 'com.michael-bull.kotlin-retry:kotlin-retry:1.0.4'
+    implementation("com.michael-bull.kotlin-retry:kotlin-retry:1.0.5")
 }
 ```
 

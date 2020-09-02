@@ -41,10 +41,14 @@ such, we may want to retry this operation until 5 attempts in total have been
 executed:
 
 ```kotlin
+import com.github.michaelbull.retry.policy.limitAttempts
+import com.github.michaelbull.retry.retry
+import kotlinx.coroutines.runBlocking
+
 suspend fun printExchangeBetween(a: Long, b: Long) {
-  val customer1 = customers.nameFromId(a)
-  val customer2 = customers.nameFromId(b)
-  println("$customer1 exchanged with $customer2")
+    val customer1 = customers.nameFromId(a)
+    val customer2 = customers.nameFromId(b)
+    println("$customer1 exchanged with $customer2")
 }
 
 fun main() = runBlocking {
@@ -60,14 +64,24 @@ reason for failure was a `SQLDataException`, pausing for 20 milliseconds before
 retrying and stopping after 5 total attempts.
 
 ```kotlin
+import com.github.michaelbull.retry.ContinueRetrying
+import com.github.michaelbull.retry.StopRetrying
+import com.github.michaelbull.retry.policy.RetryPolicy
+import com.github.michaelbull.retry.policy.constantDelay
+import com.github.michaelbull.retry.policy.limitAttempts
+import com.github.michaelbull.retry.policy.plus
+import com.github.michaelbull.retry.retry
+import kotlinx.coroutines.runBlocking
+import java.sql.SQLDataException
+
 val retryTimeouts: RetryPolicy<Throwable> = {
     if (reason is SQLDataException) ContinueRetrying else StopRetrying
 }
 
 suspend fun printExchangeBetween(a: Long, b: Long) {
-  val customer1 = customers.nameFromId(a)
-  val customer2 = customers.nameFromId(b)
-  println("$customer1 exchanged with $customer2")
+    val customer1 = customers.nameFromId(a)
+    val customer2 = customers.nameFromId(b)
+    println("$customer1 exchanged with $customer2")
 }
 
 fun main() = runBlocking {

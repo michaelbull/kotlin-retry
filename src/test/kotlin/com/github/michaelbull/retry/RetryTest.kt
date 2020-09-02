@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @ExperimentalCoroutinesApi
 class RetryTest {
@@ -19,50 +20,45 @@ class RetryTest {
     private data class AttemptsException(val attempts: Int) : Exception()
 
     @Test
-    fun `retry should attempt until succeeding`() = runBlockingTest {
+    fun `retry continues until succeeding`() = runBlockingTest {
         var attempts = 0
 
-        val result = retry(limitAttempts(5)) {
+        retry(limitAttempts(5)) {
             attempts++
 
             if (attempts < 5) {
                 throw AttemptsException(attempts)
-            } else {
-                attempts
             }
         }
 
-        assertEquals(5, result)
+        assertEquals(5, attempts)
     }
 
     @Test
-    fun `retry should attempt for specified number of attempts`() = runBlockingTest {
+    fun `retry continues up to specified number of attempts`() {
         var attempts = 0
 
-        try {
-            retry(limitAttempts(10)) {
-                attempts++
+        assertThrows<AttemptsException> {
+            runBlockingTest {
+                retry(limitAttempts(10)) {
+                    attempts++
 
-                if (attempts < 15) {
-                    throw AttemptsException(attempts)
-                } else {
-                    attempts
+                    if (attempts < 15) {
+                        throw AttemptsException(attempts)
+                    }
                 }
             }
-        } catch (ignored: Exception) {
-            /* empty */
         }
 
         assertEquals(10, attempts)
     }
 
     @Test
-    fun `retry should throw most recent exception if attempts exhausted`() = runBlockingTest {
+    fun `retry throws most recent exception if attempts exhausted`() = runBlockingTest {
         var attempts = 0
         lateinit var mostRecentException: Exception
 
         try {
-            @Suppress("IMPLICIT_NOTHING_AS_TYPE_PARAMETER")
             retry(limitAttempts(5)) {
                 attempts++
                 throw AttemptsException(attempts)
@@ -75,12 +71,22 @@ class RetryTest {
     }
 
     @Test
-    fun `retry should not attempt again after throwing CancellationException`() {
+    fun `retry does not swallow CancellationExceptions`() {
+        assertThrows<CancellationException> {
+            runBlockingTest {
+                retry {
+                    throw CancellationException()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `retry does not continue after throwing CancellationException`() {
         var attempts = 0
 
-        try {
+        assertThrows<CancellationException> {
             runBlockingTest {
-                @Suppress("IMPLICIT_NOTHING_AS_TYPE_PARAMETER")
                 retry(limitAttempts(5)) {
                     attempts++
 
@@ -91,15 +97,13 @@ class RetryTest {
                     }
                 }
             }
-        } catch (ignored: CancellationException) {
-            /* empty */
         }
 
         assertEquals(2, attempts)
     }
 
     @Test
-    fun `retry should delay between retries for duration calculated from backoff strategy`() {
+    fun `retry delays between attempts for duration calculated from backoff strategy`() {
         val dispatcher = spyk(TestCoroutineDispatcher())
 
         var attempts = 0
@@ -133,7 +137,7 @@ class RetryTest {
     }
 
     @Test
-    fun `retry should adhere to custom policy`() = runBlockingTest {
+    fun `retry adheres to custom policy`() = runBlockingTest {
         val policy: RetryPolicy<Throwable> = {
             if (reason is AttemptsException) ContinueRetrying else StopRetrying
         }
@@ -142,7 +146,6 @@ class RetryTest {
         lateinit var mostRecentException: Exception
 
         try {
-            @Suppress("IMPLICIT_NOTHING_AS_TYPE_PARAMETER")
             retry(policy + limitAttempts(15)) {
                 attempts++
                 throw AttemptsException(attempts)

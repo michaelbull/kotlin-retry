@@ -11,6 +11,8 @@ import com.github.michaelbull.retry.policy.limitAttempts
 import com.github.michaelbull.retry.policy.plus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 private typealias ResultProducer<V, E> = suspend () -> Result<V, E>
 
@@ -20,7 +22,14 @@ private typealias ResultProducer<V, E> = suspend () -> Result<V, E>
  */
 suspend fun <V, E> ResultProducer<V, E>.retryResult(
     policy: RetryPolicy<E> = constantDelay(50) + limitAttempts(5)
-) = retryResult(policy, this)
+): Result<V, E> {
+    contract {
+        callsInPlace(policy, InvocationKind.UNKNOWN)
+        callsInPlace(this@retryResult, InvocationKind.AT_LEAST_ONCE)
+    }
+
+    return retryResult(policy, this)
+}
 
 /**
  * Runs the [block] of code, following [RetryInstruction]s returned when
@@ -30,6 +39,11 @@ suspend fun <V, E> retryResult(
     policy: RetryPolicy<E> = constantDelay(50) + limitAttempts(5),
     block: ResultProducer<V, E>
 ): Result<V, E> {
+    contract {
+        callsInPlace(policy, InvocationKind.UNKNOWN)
+        callsInPlace(block, InvocationKind.AT_LEAST_ONCE)
+    }
+
     return withContext(RetryStatus()) {
         lateinit var mostRecentFailure: Err<E>
 

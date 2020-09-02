@@ -9,6 +9,8 @@ import com.github.michaelbull.retry.policy.plus
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 private typealias Producer<T> = suspend () -> T
 
@@ -20,7 +22,14 @@ private val DEFAULT_POLICY: RetryPolicy<Throwable> = constantDelay(50) + limitAt
  */
 suspend fun <T> Producer<T>.retry(
     policy: RetryPolicy<Throwable> = DEFAULT_POLICY
-) = retry(policy, this)
+): T {
+    contract {
+        callsInPlace(policy, InvocationKind.UNKNOWN)
+        callsInPlace(this@retry, InvocationKind.AT_LEAST_ONCE)
+    }
+
+    return retry(policy, this)
+}
 
 /**
  * Runs the [block] of code, following [RetryInstruction]s returned when
@@ -30,6 +39,11 @@ suspend fun <T> retry(
     policy: RetryPolicy<Throwable> = DEFAULT_POLICY,
     block: Producer<T>
 ): T {
+    contract {
+        callsInPlace(policy, InvocationKind.UNKNOWN)
+        callsInPlace(block, InvocationKind.AT_LEAST_ONCE)
+    }
+
     return withContext(RetryStatus()) {
         lateinit var mostRecentFailure: Throwable
 

@@ -1,8 +1,13 @@
 package com.github.michaelbull.retry.policy
 
-import com.github.michaelbull.retry.*
+import com.github.michaelbull.retry.ContinueRetrying
+import com.github.michaelbull.retry.RetryAfter
+import com.github.michaelbull.retry.RetryInstruction
+import com.github.michaelbull.retry.binaryExponential
 import com.github.michaelbull.retry.context.retryRandom
 import com.github.michaelbull.retry.context.retryStatus
+import com.github.michaelbull.retry.saturatedAdd
+import com.github.michaelbull.retry.saturatedMultiply
 import kotlin.coroutines.coroutineContext
 import kotlin.math.max
 import kotlin.math.min

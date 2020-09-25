@@ -117,6 +117,11 @@ publishing {
                         name.set("Nicolas Dermine")
                         url.set("https://github.com/nicoder")
                     }
+
+                    contributor {
+                        name.set("Thorsten Hake")
+                        url.set("http://www.thorsten-hake.com/")
+                    }
                 }
 
                 scm {

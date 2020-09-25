@@ -1,5 +1,6 @@
 package com.github.michaelbull.retry.policy
 
+import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.RetryAfter
 import com.github.michaelbull.retry.RetryInstruction
 import com.github.michaelbull.retry.binaryExponential
@@ -53,8 +54,7 @@ fun fullJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
         /* sleep = random_between(0, min(cap, base * 2 ** attempt)) */
         val delay = min(max, base saturatedMultiply attempt.binaryExponential())
         val randomDelay = random.nextLong(delay saturatedAdd 1)
-
-        RetryAfter(randomDelay)
+        if (randomDelay == 0L) ContinueRetrying else RetryAfter(randomDelay)
     }
 }
 

@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -70,6 +71,16 @@ class BackoffTest {
         runBlockingTest(RetryRandom(random)) {
             val instruction = simulate(attempt, fullJitter)
             assertEquals(expectedDelay, instruction.delayMillis)
+        }
+    }
+    @Test
+    fun `full jitter random bounds`() {
+        runBlockingTest(RetryRandom(mockk<Random>(relaxed = true).apply {
+            every { nextLong(any()) } answers { 0 }
+            every { nextLong(any(), any()) } answers { firstArg()  }
+        })) {
+            val instruction = simulate(0, fullJitter)
+            assertEquals(1L, instruction.delayMillis)
         }
     }
 

@@ -73,12 +73,14 @@ class BackoffTest {
             assertEquals(expectedDelay, instruction.delayMillis)
         }
     }
+
     @Test
     fun `full jitter lower random bound`() {
         val lowerBoundRandom = mockk<Random>(relaxed = true).apply {
             every { nextLong(any()) } answers { 0 }
-            every { nextLong(any(), any()) } answers { firstArg()  }
+            every { nextLong(any(), any()) } answers { firstArg() }
         }
+
         runBlockingTest(RetryRandom(lowerBoundRandom)) {
             val instruction = simulate(0, fullJitter)
             assertEquals(0L, instruction.delayMillis)

@@ -17,7 +17,6 @@ plugins {
     kotlin("jvm") version "1.4.21-2"
     id("org.jetbrains.dokka") version "1.4.20"
     id("com.github.ben-manes.versions") version "0.36.0"
-    id("net.researchgate.release") version "2.8.1"
 }
 
 repositories {

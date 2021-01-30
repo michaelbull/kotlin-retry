@@ -94,8 +94,8 @@ fun main() = runBlocking {
 ## Backoff
 
 The examples above retry executions immediately after they fail, however we may
-wish to spread out retries out with an ever-increasing delay. This is known as
-a "backoff" and comes in many forms. This library includes all the forms of
+wish to spread out retries with an ever-increasing delay. This is known as a
+"backoff" and comes in many forms. This library includes all the forms of
 backoff strategy detailed the article by Marc Brooker on the AWS Architecture
 Blog entitled ["Exponential Backoff And Jitter"][aws-backoff].
 

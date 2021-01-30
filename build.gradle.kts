@@ -153,7 +153,3 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     sign(publishing.publications)
 }
-
-tasks.afterReleaseBuild {
-    dependsOn(tasks.publish)
-}

@@ -48,7 +48,7 @@ class LimitTest {
 
     @Test
     fun `maxDelay does not change immediate retry`() {
-        val policy = limitAttempts(5)
+        val policy = limitAttempts(5).maxDelay<Unit>(20)
         val status = RetryStatus()
 
         runBlockingTest(status) {

@@ -50,10 +50,11 @@ suspend fun <T> retry(
         while (true) {
             try {
                 return@withContext block()
-            } catch (ex: CancellationException) {
-                /* avoid swallowing CancellationExceptions */
-                throw ex
             } catch (t: Throwable) {
+                /* avoid swallowing CancellationExceptions */
+                if (t is CancellationException) {
+                    throw t
+                }
                 val instruction = RetryFailure(t).policy()
 
                 val status = coroutineContext.retryStatus

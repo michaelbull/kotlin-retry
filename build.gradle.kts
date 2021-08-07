@@ -126,6 +126,11 @@ publishing {
                         name.set("gnefedev")
                         url.set("https://github.com/gnefedev")
                     }
+
+                    contributor {
+                        name.set("cherrydev")
+                        url.set("https://github.com/cherrydev")
+                    }
                 }
 
                 scm {

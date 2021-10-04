@@ -25,7 +25,7 @@ dependencies {
 ## Introduction
 
 IO operations often experience temporary failures that warrant re-execution,
-e.g. a database transaction that may fail due to a deadlock.<sup>[[1]][innodb-deadlocks][[2]][postgres-deadlocks]</sup>
+e.g. a database transaction that may fail due to a deadlock.<sup>[1][innodb-deadlocks][2][postgres-deadlocks]</sup>
 
 > _“even if your application logic is correct, you must still handle the case
 >  where a transaction must be retried”_

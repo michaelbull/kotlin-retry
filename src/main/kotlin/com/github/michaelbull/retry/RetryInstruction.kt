@@ -6,8 +6,8 @@ import com.github.michaelbull.retry.policy.RetryPolicy
  * Represents an instruction for the [retry] function to follow after
  * evaluating a [RetryPolicy].
  */
-@Suppress("NON_PUBLIC_PRIMARY_CONSTRUCTOR_OF_INLINE_CLASS")
-inline class RetryInstruction @PublishedApi internal constructor(
+@JvmInline
+value class RetryInstruction @PublishedApi internal constructor(
     val delayMillis: Long
 )
 

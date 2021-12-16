@@ -4,11 +4,8 @@ import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.RetryAfter
 import com.github.michaelbull.retry.RetryInstruction
 import com.github.michaelbull.retry.binaryExponential
-import com.github.michaelbull.retry.context.retryRandom
-import com.github.michaelbull.retry.context.retryStatus
 import com.github.michaelbull.retry.saturatedAdd
 import com.github.michaelbull.retry.saturatedMultiply
-import kotlin.coroutines.coroutineContext
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,8 +21,6 @@ fun binaryExponentialBackoff(base: Long, max: Long): RetryPolicy<*> {
     require(max > 0) { "max must be positive: $max" }
 
     return {
-        val attempt = coroutineContext.retryStatus.attempt
-
         /* sleep = min(cap, base * 2 ** attempt) */
         val delay = min(max, base saturatedMultiply attempt.binaryExponential())
 
@@ -48,9 +43,6 @@ fun fullJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
     require(max > 0) { "max must be positive: $max" }
 
     return {
-        val random = coroutineContext.retryRandom.random
-        val attempt = coroutineContext.retryStatus.attempt
-
         /* sleep = random_between(0, min(cap, base * 2 ** attempt)) */
         val delay = min(max, base saturatedMultiply attempt.binaryExponential())
         val randomDelay = random.nextLong(delay saturatedAdd 1)
@@ -73,9 +65,6 @@ fun equalJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
     require(max > 0) { "max must be positive: $max" }
 
     return {
-        val random = coroutineContext.retryRandom.random
-        val attempt = coroutineContext.retryStatus.attempt
-
         /* temp = min(cap, base * 2 ** attempt) */
         val delay = min(max, base saturatedMultiply attempt.binaryExponential())
 
@@ -101,9 +90,6 @@ fun decorrelatedJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
     require(max > 0) { "max must be positive: $max" }
 
     return {
-        val random = coroutineContext.retryRandom.random
-        val previousDelay = coroutineContext.retryStatus.previousDelay
-
         /* sleep = min(cap, random_between(base, sleep * 3)) */
         val delay = max(base, previousDelay saturatedMultiply 3)
         val randomDelay = min(max, random.nextLong(base, delay saturatedAdd 1))

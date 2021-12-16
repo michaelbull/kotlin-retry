@@ -156,4 +156,24 @@ class RetryTest {
 
         assertEquals(AttemptsException(15), mostRecentException)
     }
+
+    @Test
+    fun `retry has correct coroutine context`() = runBlockingTest {
+        retry {
+            // This crashes because coroutineContext is obtained from the withTimeout scope
+            println("My retryStatus is ${attempt}")
+
+//                // This is okay (naming conflict with coroutineContext)
+//                println("My retryStatus is ${kotlin.coroutines.coroutineContext.retryStatus}")
+//
+//                // This is also okay
+//                coroutineScope {
+//                    println("My retryStatus is ${coroutineContext.retryStatus}")
+//                }
+//
+//                Ok(Unit)
+//            }
+        }
+
+    }
 }

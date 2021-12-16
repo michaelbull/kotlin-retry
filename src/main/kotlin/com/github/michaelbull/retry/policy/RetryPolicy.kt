@@ -26,8 +26,8 @@ typealias RetryPolicy<E> = suspend RetryFailure<E>.() -> RetryInstruction
  * an [instruction][RetryInstruction] to [RetryAfter] the larger delay.
  */
 operator fun <E> RetryPolicy<E>.plus(other: RetryPolicy<E>): RetryPolicy<E> = {
-    val a = this@plus(this)
-    val b = other(this)
+    val a = invoke(this)
+    val b = other.invoke(this)
 
     when {
         a == StopRetrying || b == StopRetrying -> StopRetrying

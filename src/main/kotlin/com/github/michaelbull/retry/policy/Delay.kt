@@ -28,7 +28,7 @@ fun <E> RetryPolicy<E>.maxDelay(delayMillis: Long): RetryPolicy<E> {
     require(delayMillis > 0) { "delayMillis must be positive: $delayMillis" }
 
     return {
-        val instruction = this.(this@maxDelay)()
+        val instruction = this@maxDelay.invoke(this)
 
         if (instruction == StopRetrying || instruction == ContinueRetrying) {
             instruction

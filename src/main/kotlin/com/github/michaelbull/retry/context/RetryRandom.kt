@@ -7,7 +7,8 @@ import kotlin.random.Random
 
 private val DEFAULT = RetryRandom()
 
-val CoroutineContext.retryRandom: RetryRandom
+@PublishedApi
+internal val CoroutineContext.retryRandom: RetryRandom
     get() = get(RetryRandom) ?: DEFAULT
 
 /**

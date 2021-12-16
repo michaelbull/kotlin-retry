@@ -1,15 +1,15 @@
 package com.github.michaelbull.retry.policy
 
-import com.github.michaelbull.retry.RetryFailure
+import com.github.michaelbull.retry.DelegatedRetryFailure
 import com.github.michaelbull.retry.RetryInstruction
+import com.github.michaelbull.retry.context.CoroutineRetryScope
 import com.github.michaelbull.retry.context.RetryRandom
 import com.github.michaelbull.retry.context.RetryStatus
-import com.github.michaelbull.retry.context.retryStatus
+import com.github.michaelbull.retry.context.retryRandom
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import java.util.stream.Stream
+import kotlin.coroutines.coroutineContext
 import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
@@ -35,22 +36,20 @@ class BackoffTest {
 
     private suspend fun simulate(attempt: Int, policy: RetryPolicy<Unit>): RetryInstruction {
         var lastInstruction: RetryInstruction? = null
-        val failure = RetryFailure(Unit)
+        val status = RetryStatus()
 
-        withContext(RetryStatus()) {
-            repeat(attempt + 1) {
-                val status = coroutineContext.retryStatus
-                val instruction = failure.policy()
-                val delay = instruction.delayMillis
+        repeat(attempt + 1) {
+            val retryScope = CoroutineRetryScope(status, coroutineContext.retryRandom)
+            val instruction = DelegatedRetryFailure(Unit, retryScope).policy()
+            val delay = instruction.delayMillis
 
-                if (delay > 0) {
-                    status.previousDelay = delay
-                    status.incrementAttempts()
-                    status.incrementCumulativeDelay(delay)
-                }
-
-                lastInstruction = instruction
+            if (delay > 0) {
+                status.previousDelay = delay
+                status.incrementAttempts()
+                status.incrementCumulativeDelay(delay)
             }
+
+            lastInstruction = instruction
         }
 
         return lastInstruction!!

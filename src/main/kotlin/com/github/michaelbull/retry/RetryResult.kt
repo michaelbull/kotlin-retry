@@ -3,76 +3,61 @@ package com.github.michaelbull.retry
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.retry.context.CoroutineRetryScope
 import com.github.michaelbull.retry.context.RetryStatus
-import com.github.michaelbull.retry.context.retryStatus
+import com.github.michaelbull.retry.context.retryRandom
 import com.github.michaelbull.retry.policy.RetryPolicy
 import com.github.michaelbull.retry.policy.constantDelay
 import com.github.michaelbull.retry.policy.limitAttempts
 import com.github.michaelbull.retry.policy.plus
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
-private typealias ResultProducer<V, E> = suspend () -> Result<V, E>
-
-/**
- * Runs [this] block of code, following [RetryInstruction]s returned when
- * evaluating the [policy].
- */
-suspend fun <V, E> ResultProducer<V, E>.retryResult(
-    policy: RetryPolicy<E> = constantDelay(50) + limitAttempts(5)
-): Result<V, E> {
-    contract {
-        callsInPlace(policy, InvocationKind.UNKNOWN)
-        callsInPlace(this@retryResult, InvocationKind.AT_LEAST_ONCE)
-    }
-
-    return retryResult(policy, this)
-}
+import kotlin.coroutines.coroutineContext
 
 /**
  * Runs the [block] of code, following [RetryInstruction]s returned when
  * evaluating the [policy].
  */
-suspend fun <V, E> retryResult(
-    policy: RetryPolicy<E> = constantDelay(50) + limitAttempts(5),
-    block: ResultProducer<V, E>
+suspend inline fun <V, E> retryResult(
+    noinline policy: RetryPolicy<E> = constantDelay(50) + limitAttempts(5),
+    block: RetryScope.() -> Result<V, E>
 ): Result<V, E> {
     contract {
         callsInPlace(policy, InvocationKind.UNKNOWN)
         callsInPlace(block, InvocationKind.AT_LEAST_ONCE)
     }
 
-    return withContext(RetryStatus()) {
-        lateinit var mostRecentFailure: Err<E>
+    val status = RetryStatus()
+    val scope = CoroutineRetryScope(status, coroutineContext.retryRandom)
 
-        while (true) {
-            val result = block()
+    lateinit var mostRecentFailure: Err<E>
 
-            if (result is Ok) {
-                return@withContext result
-            } else if (result is Err) {
-                val instruction = RetryFailure(result.error).policy()
+    while (true) {
+        val result = block(scope)
 
-                val status = coroutineContext.retryStatus
-                status.incrementAttempts()
+        if (result is Ok) {
+            return result
+        } else if (result is Err) {
+            val failure = DelegatedRetryFailure(result.error, scope)
+            val instruction = failure.policy()
 
-                if (instruction == StopRetrying) {
-                    mostRecentFailure = result
-                    break
-                } else if (instruction == ContinueRetrying) {
-                    status.previousDelay = 0
-                    continue
-                } else {
-                    val delay = instruction.delayMillis
-                    delay(delay)
-                    status.previousDelay = delay
-                    status.incrementCumulativeDelay(delay)
-                }
+            status.incrementAttempts()
+
+            if (instruction == StopRetrying) {
+                mostRecentFailure = result
+                break
+            } else if (instruction == ContinueRetrying) {
+                status.previousDelay = 0
+                continue
+            } else {
+                val delay = instruction.delayMillis
+                delay(delay)
+                status.previousDelay = delay
+                status.incrementCumulativeDelay(delay)
             }
         }
-
-        mostRecentFailure
     }
+
+    return mostRecentFailure
 }

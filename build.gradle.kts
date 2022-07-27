@@ -14,9 +14,9 @@ description = "A higher-order function for retrying operations that may fail."
 plugins {
     `maven-publish`
     signing
-    kotlin("jvm") version "1.6.10"
-    id("org.jetbrains.dokka") version "1.6.0"
-    id("com.github.ben-manes.versions") version "0.39.0"
+    kotlin("jvm") version "1.7.10"
+    id("org.jetbrains.dokka") version "1.7.10"
+    id("com.github.ben-manes.versions") version "0.42.0"
 }
 
 repositories {
@@ -26,11 +26,11 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.13")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
-    testImplementation("io.mockk:mockk:1.12.1")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation("io.mockk:mockk:1.12.5")
 }
 
 tasks.withType<DependencyUpdatesTask> {

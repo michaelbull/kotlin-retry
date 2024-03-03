@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.9.22"
 kotlin-coroutines = "1.8.0"
-mockk = "1.12.5"
+mockk = "1.13.10"
 versions-plugin = "0.51.0"
 
 [libraries]

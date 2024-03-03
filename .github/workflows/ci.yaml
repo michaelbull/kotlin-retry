@@ -1,61 +1,126 @@
-name: ci
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Build
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            tasks: build
+
+          - os: macos-latest
+            tasks: >
+              iosX64Test
+              macosX64Test
+              tvosX64Test
+              watchosX64Test
+
+          - os: windows-latest
+            tasks: mingwX64Test
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Project
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - uses: actions/cache@v1
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2 # v2.1.1
+
+      - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
         with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-wrapper-
+          path: |
+            ~/.konan
+          key: ${{ runner.os }}-${{ hashFiles('**/.lock') }}
 
-      - uses: actions/cache@v1
+      - name: Setup JDK
+        uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
         with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts') }} }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-caches-
+          distribution: temurin
+          java-version: 8
 
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
-      - run: ./gradlew build
+      - name: Build with Gradle Wrapper
+        run: ./gradlew ${{ matrix.tasks }}
 
   publish:
+    name: Publish
+    runs-on: ${{ matrix.os }}
+
     needs: build
     if: github.ref == 'refs/heads/master' && github.event_name == 'push' && needs.build.result == 'success'
-    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            tasks: >
+              publishAndroidNativeArm32PublicationToMavenRepository
+              publishAndroidNativeArm64PublicationToMavenRepository
+              publishAndroidNativeX64PublicationToMavenRepository
+              publishAndroidNativeX86PublicationToMavenRepository
+              publishJsPublicationToMavenRepository
+              publishJvmPublicationToMavenRepository
+              publishKotlinMultiplatformPublicationToMavenRepository
+              publishLinuxArm64PublicationToMavenRepository
+              publishLinuxX64PublicationToMavenRepository
+              publishWasmJsPublicationToMavenRepository
+
+          - os: windows-latest
+            tasks: publishMingwX64PublicationToMavenRepository
+
+          - os: macos-latest
+            tasks: >
+              publishIosArm64PublicationToMavenRepository
+              publishIosSimulatorArm64PublicationToMavenRepository
+              publishIosX64PublicationToMavenRepository
+              publishMacosArm64PublicationToMavenRepository
+              publishMacosX64PublicationToMavenRepository
+              publishTvosArm64PublicationToMavenRepository
+              publishTvosSimulatorArm64PublicationToMavenRepository
+              publishTvosX64PublicationToMavenRepository
+              publishWatchosArm32PublicationToMavenRepository
+              publishWatchosArm64PublicationToMavenRepository
+              publishWatchosDeviceArm64PublicationToMavenRepository
+              publishWatchosSimulatorArm64PublicationToMavenRepository
+              publishWatchosX64PublicationToMavenRepository
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Project
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - uses: actions/cache@v1
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@699bb18358f12c5b78b37bb0111d3a0e2276e0e2 # v2.1.1
+
+      - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
         with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-wrapper-
+          path: |
+            ~/.konan
+          key: ${{ runner.os }}-${{ hashFiles('**/.lock') }}
 
-      - uses: actions/cache@v1
+      - name: Setup JDK
+        uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
         with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts') }} }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-caches-
+          distribution: temurin
+          java-version: 8
 
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
-      - run: ./gradlew publish
+      - name: Publish with Gradle Wrapper
+        run: ./gradlew ${{ matrix.tasks }}
         env:
           ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}

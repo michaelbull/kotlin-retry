@@ -1,8 +1,25 @@
 # kotlin-retry
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.michael-bull.kotlin-retry/kotlin-retry.svg)](https://search.maven.org/search?q=g:com.michael-bull.kotlin-retry) [![CI Status](https://github.com/michaelbull/kotlin-retry/workflows/ci/badge.svg)](https://github.com/michaelbull/kotlin-retry/actions?query=workflow%3Aci) [![License](https://img.shields.io/github/license/michaelbull/kotlin-retry.svg)](https://github.com/michaelbull/kotlin-retry/blob/master/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/com.michael-bull.kotlin-retry/kotlin-retry.svg)](https://search.maven.org/search?q=g:com.michael-bull.kotlin-retry)
+[![CI](https://github.com/michaelbull/kotlin-retry/actions/workflows/ci.yaml/badge.svg)](https://github.com/michaelbull/kotlin-retry/actions/workflows/ci.yaml)
+[![License](https://img.shields.io/github/license/michaelbull/kotlin-retry.svg)](https://github.com/michaelbull/kotlin-retry/blob/master/LICENSE)
 
-[`retry`][retry] is a higher-order function for retrying operations that may fail.
+![badge][badge-android]
+![badge][badge-jvm]
+![badge][badge-js]
+![badge][badge-nodejs]
+![badge][badge-linux]
+![badge][badge-windows]
+![badge][badge-wasm]
+![badge][badge-ios]
+![badge][badge-mac]
+![badge][badge-tvos]
+![badge][badge-watchos]
+![badge][badge-js-ir]
+![badge][badge-android-native]
+![badge][badge-apple-silicon]
+
+A multiplatform higher-order function for retrying operations that may fail.
 
 ```kotlin
 retry(constantDelay(delayMillis = 50L) + stopAtAttempts(10)) {
@@ -18,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.michael-bull.kotlin-retry:kotlin-retry:1.0.9")
+    implementation("com.michael-bull.kotlin-retry:kotlin-retry:2.0.0")
 }
 ```
 
@@ -182,3 +199,18 @@ This project is available under the terms of the ISC license. See the
 [retry-policy]: https://github.com/michaelbull/kotlin-retry/blob/master/src/main/kotlin/com/github/michaelbull/retry/policy/RetryPolicy.kt
 [aws-backoff]: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
 [haskell-retry]: http://hackage.haskell.org/package/retry-0.8.0.1/docs/Control-Retry.html
+
+[badge-android]: http://img.shields.io/badge/-android-6EDB8D.svg?style=flat
+[badge-android-native]: http://img.shields.io/badge/support-[AndroidNative]-6EDB8D.svg?style=flat
+[badge-jvm]: http://img.shields.io/badge/-jvm-DB413D.svg?style=flat
+[badge-js]: http://img.shields.io/badge/-js-F8DB5D.svg?style=flat
+[badge-js-ir]: https://img.shields.io/badge/support-[IR]-AAC4E0.svg?style=flat
+[badge-nodejs]: https://img.shields.io/badge/-nodejs-68a063.svg?style=flat
+[badge-linux]: http://img.shields.io/badge/-linux-2D3F6C.svg?style=flat
+[badge-windows]: http://img.shields.io/badge/-windows-4D76CD.svg?style=flat
+[badge-wasm]: https://img.shields.io/badge/-wasm-624FE8.svg?style=flat
+[badge-apple-silicon]: http://img.shields.io/badge/support-[AppleSilicon]-43BBFF.svg?style=flat
+[badge-ios]: http://img.shields.io/badge/-ios-CDCDCD.svg?style=flat
+[badge-mac]: http://img.shields.io/badge/-macos-111111.svg?style=flat
+[badge-watchos]: http://img.shields.io/badge/-watchos-C0C0C0.svg?style=flat
+[badge-tvos]: http://img.shields.io/badge/-tvos-808080.svg?style=flat

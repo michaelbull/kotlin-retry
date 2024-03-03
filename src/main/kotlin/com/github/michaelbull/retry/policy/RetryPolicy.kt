@@ -1,37 +1,48 @@
 package com.github.michaelbull.retry.policy
 
-import com.github.michaelbull.retry.ContinueRetrying
-import com.github.michaelbull.retry.RetryAfter
-import com.github.michaelbull.retry.RetryFailure
-import com.github.michaelbull.retry.RetryInstruction
-import com.github.michaelbull.retry.StopRetrying
-import com.github.michaelbull.retry.context.RetryStatus
+import com.github.michaelbull.retry.attempt.FailedAttempt
+import com.github.michaelbull.retry.instruction.ContinueRetrying
+import com.github.michaelbull.retry.instruction.RetryAfter
+import com.github.michaelbull.retry.instruction.RetryInstruction
+import com.github.michaelbull.retry.instruction.StopRetrying
 import kotlin.math.max
 
-/**
- * A [RetryPolicy] evaluates a [RetryFailure] in context of the current
- * [RetryStatus] and returns a [RetryInstruction].
- */
-typealias RetryPolicy<E> = suspend RetryFailure<E>.() -> RetryInstruction
+fun interface RetryPolicy<E> {
+    operator fun invoke(attempt: FailedAttempt<E>): RetryInstruction
+}
 
 /**
- * Creates a combined [RetryPolicy] of [this] and the [other].
+ * Merges the [previous](prev) and [current](curr) [RetryPolicy] into a single [RetryPolicy].
  *
- * If either policy returns an [instruction][RetryInstruction] to
- * [StopRetrying], the combined [policy][RetryPolicy] will return an
- * [instruction][RetryInstruction] to [StopRetrying].
+ * If either policy returns an [instruction][RetryInstruction] to [StopRetrying], the combined [policy][RetryPolicy]
+ * will return an [instruction][RetryInstruction] to [StopRetrying].
  *
- * If both [policies][RetryPolicy] return an [instruction][RetryInstruction] to
- * [RetryAfter] a given delay, the combined [policy][RetryPolicy] will return
- * an [instruction][RetryInstruction] to [RetryAfter] the larger delay.
+ * If both [policies][RetryPolicy] return an [instruction][RetryInstruction] to [RetryAfter] a given delay, the combined
+ * [policy][RetryPolicy] will return an [instruction][RetryInstruction] to [RetryAfter] the larger delay.
  */
-operator fun <E> RetryPolicy<E>.plus(other: RetryPolicy<E>): RetryPolicy<E> = {
-    val a = invoke(this)
-    val b = other.invoke(this)
+fun <E> RetryPolicy(prev: RetryPolicy<E>, curr: RetryPolicy<E>) = RetryPolicy { attempt ->
+    val prevInstruction = prev(attempt)
+    val currInstruction = curr(attempt)
+
+    val eitherStopping = prevInstruction == StopRetrying || currInstruction == StopRetrying
+    val bothContinuing = prevInstruction == ContinueRetrying && currInstruction == ContinueRetrying
 
     when {
-        a == StopRetrying || b == StopRetrying -> StopRetrying
-        a == ContinueRetrying && b == ContinueRetrying -> ContinueRetrying
-        else -> RetryAfter(max(a.delayMillis, b.delayMillis))
+        eitherStopping -> StopRetrying
+        bothContinuing -> ContinueRetrying
+        else -> {
+            val prevDelay = prevInstruction.delayMillis;
+            val currDelay = currInstruction.delayMillis;
+            val greatestDelay = max(prevDelay, currDelay)
+            RetryAfter(greatestDelay)
+        }
     }
+}
+
+fun <E> RetryPolicy(first: RetryPolicy<E>, second: RetryPolicy<E>, vararg rest: RetryPolicy<E>): RetryPolicy<E> {
+    return listOf(first, second, *rest).reduce(::RetryPolicy)
+}
+
+operator fun <E> RetryPolicy<E>.plus(other: RetryPolicy<E>): RetryPolicy<E> {
+    return RetryPolicy(this, other)
 }

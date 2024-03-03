@@ -1,35 +1,39 @@
 package com.github.michaelbull.retry.policy
 
-import com.github.michaelbull.retry.ContinueRetrying
-import com.github.michaelbull.retry.RetryAfter
-import com.github.michaelbull.retry.RetryInstruction
 import com.github.michaelbull.retry.binaryExponential
+import com.github.michaelbull.retry.instruction.ContinueRetrying
+import com.github.michaelbull.retry.instruction.RetryAfter
+import com.github.michaelbull.retry.instruction.RetryInstruction
 import com.github.michaelbull.retry.saturatedAdd
 import com.github.michaelbull.retry.saturatedMultiply
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 /* https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/ */
 
 /**
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to
- * [RetryAfter] an amount of milliseconds between [base] and [max] inclusive,
+ * [RetryAfter] an amount of milliseconds between [min] and [max] inclusive,
  * increasing the delay by 2 to the power of the number of attempts made.
+ *
+ * @throws IllegalArgumentException if [min] or [max] are not positive.
  */
-fun binaryExponentialBackoff(base: Long, max: Long): RetryPolicy<*> {
-    require(base > 0) { "base must be positive: $base" }
-    require(max > 0) { "max must be positive: $max" }
+fun <E> binaryExponentialBackoff(
+    min: Long,
+    max: Long,
+): RetryPolicy<E> {
+    require(min > 0) { "min must be positive, but was $min" }
+    require(max > 0) { "max must be positive, but was $max" }
 
-    return {
-        /* sleep = min(cap, base * 2 ** attempt) */
-        val delay = min(max, base saturatedMultiply attempt.binaryExponential())
-
+    return RetryPolicy { attempt ->
+        val delay = min(max, min saturatedMultiply attempt.number.binaryExponential())
         RetryAfter(delay)
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun binaryExponentialBackoff(range: LongRange): RetryPolicy<*> {
+inline fun <E> binaryExponentialBackoff(range: LongRange): RetryPolicy<E> {
     return binaryExponentialBackoff(range.first, range.last)
 }
 
@@ -37,68 +41,94 @@ inline fun binaryExponentialBackoff(range: LongRange): RetryPolicy<*> {
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to
  * [RetryAfter] a random amount of milliseconds between 0 and [max] inclusive,
  * increasing the delay by 2 to the power of number of attempts made.
+ *
+ * @throws IllegalArgumentException if [min] or [max] are not positive.
  */
-fun fullJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
-    require(base > 0) { "base must be positive: $base" }
-    require(max > 0) { "max must be positive: $max" }
+fun <E> fullJitterBackoff(
+    min: Long,
+    max: Long,
+    random: Random = Random,
+): RetryPolicy<E> {
+    require(min > 0) { "min must be positive, but was $min" }
+    require(max > 0) { "max must be positive, but was $max" }
 
-    return {
-        /* sleep = random_between(0, min(cap, base * 2 ** attempt)) */
-        val delay = min(max, base saturatedMultiply attempt.binaryExponential())
-        val randomDelay = random.nextLong(delay saturatedAdd 1)
-        if (randomDelay == 0L) ContinueRetrying else RetryAfter(randomDelay)
+    return RetryPolicy { attempt ->
+        val jitter = min(max, min saturatedMultiply attempt.number.binaryExponential())
+        val randomJitter = random.nextLong(jitter saturatedAdd 1)
+
+        if (randomJitter == 0L) {
+            ContinueRetrying
+        } else {
+            RetryAfter(randomJitter)
+        }
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun fullJitterBackoff(range: LongRange): RetryPolicy<*> {
-    return fullJitterBackoff(range.first, range.last)
+inline fun <E> fullJitterBackoff(range: LongRange, random: Random = Random): RetryPolicy<E> {
+    return fullJitterBackoff(range.first, range.last, random)
 }
 
 /**
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to
  * [RetryAfter] an amount of milliseconds equally portioned between the
  * [binaryExponentialBackoff] and [fullJitterBackoff].
+ *
+ * @throws IllegalArgumentException if [min] or [max] are not positive.
  */
-fun equalJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
-    require(base > 0) { "base must be positive: $base" }
-    require(max > 0) { "max must be positive: $max" }
+fun <E> equalJitterBackoff(
+    min: Long,
+    max: Long,
+    random: Random = Random,
+): RetryPolicy<E> {
+    require(min > 0) { "min must be positive, but was $min" }
+    require(max > 0) { "max must be positive, but was $max" }
 
-    return {
-        /* temp = min(cap, base * 2 ** attempt) */
-        val delay = min(max, base saturatedMultiply attempt.binaryExponential())
+    return RetryPolicy { attempt ->
+        val jitter = min(max, min saturatedMultiply attempt.number.binaryExponential())
+        val randomJitter = random.nextLong((jitter / 2) saturatedAdd 1)
+        val delayWithJitter = (jitter / 2) saturatedAdd randomJitter
 
-        /* sleep = temp / 2 + random_between(0, temp / 2) */
-        val randomDelay = (delay / 2) saturatedAdd random.nextLong((delay / 2) saturatedAdd 1)
-
-        RetryAfter(randomDelay)
+        RetryAfter(delayWithJitter)
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun equalJitterBackoff(range: LongRange): RetryPolicy<*> {
-    return equalJitterBackoff(range.first, range.last)
+inline fun <E> equalJitterBackoff(range: LongRange, random: Random = Random): RetryPolicy<E> {
+    return equalJitterBackoff(range.first, range.last, random)
 }
 
 /**
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to
- * [RetryAfter] a random amount of milliseconds between [base] and [max]
- * inclusive, increasing by 3 times the previous delay.
+ * [RetryAfter] a random amount of milliseconds between [min] and [max]
+ * inclusive, increasing by [correlation] times the previous delay.
+ *
+ * @throws IllegalArgumentException if [min] or [max] are not positive.
  */
-fun decorrelatedJitterBackoff(base: Long, max: Long): RetryPolicy<*> {
-    require(base > 0) { "base must be positive: $base" }
-    require(max > 0) { "max must be positive: $max" }
+fun <E> decorrelatedJitterBackoff(
+    min: Long,
+    max: Long,
+    correlation: Long = 3,
+    random: Random = Random,
+): RetryPolicy<E> {
+    require(min > 0) { "min must be positive, but was $min" }
+    require(max > 0) { "max must be positive, but was $max" }
 
-    return {
-        /* sleep = min(cap, random_between(base, sleep * 3)) */
-        val delay = max(base, previousDelay saturatedMultiply 3)
-        val randomDelay = min(max, random.nextLong(base, delay saturatedAdd 1))
+    return RetryPolicy { attempt ->
+        val jitter = max(min, attempt.previousDelay saturatedMultiply correlation)
+        val randomJitter = random.nextLong(min, jitter saturatedAdd 1)
+        val delayWithJitter = min(max, randomJitter)
 
-        RetryAfter(randomDelay)
+        RetryAfter(delayWithJitter)
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun decorrelatedJitterBackoff(range: LongRange): RetryPolicy<*> {
-    return decorrelatedJitterBackoff(range.first, range.last)
+inline fun <E> decorrelatedJitterBackoff(
+    range: LongRange,
+    correlation: Long = 3,
+    random: Random = Random,
+): RetryPolicy<E> {
+    return decorrelatedJitterBackoff(range.first, range.last, correlation, random)
 }
+

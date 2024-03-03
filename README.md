@@ -5,7 +5,7 @@
 [`retry`][retry] is a higher-order function for retrying operations that may fail.
 
 ```kotlin
-retry(limitAttempts(10) + constantDelay(delayMillis = 50L)) {
+retry(constantDelay(delayMillis = 50L) + stopAtAttempts(10)) {
     /* your code */
 }
 ```
@@ -37,11 +37,11 @@ application logic and applying a specified [`RetryPolicy`][retry-policy].
 
 In the example below, either of the calls to `customers.nameFromId` may fail,
 abandoning the remaining logic within the `printExchangeBetween` function. As
-such, we may want to retry this operation until 5 attempts in total have been
+such, we may want to retry this operation until 5 invocations in total have been
 executed:
 
 ```kotlin
-import com.github.michaelbull.retry.policy.limitAttempts
+import com.github.michaelbull.retry.policy.stopAtAttempts
 import com.github.michaelbull.retry.retry
 import kotlinx.coroutines.runBlocking
 
@@ -52,7 +52,7 @@ suspend fun printExchangeBetween(a: Long, b: Long) {
 }
 
 fun main() = runBlocking {
-    retry(limitAttempts(5)) {
+    retry(stopAtAttempts(5)) {
         printExchangeBetween(1L, 2L)
     }
 }
@@ -61,21 +61,22 @@ fun main() = runBlocking {
 We can also provide a [`RetryPolicy`][retry-policy] that only retries failures
 of a specific type. The example below will retry the operation only if the
 reason for failure was a `SQLDataException`, pausing for 20 milliseconds before
-retrying and stopping after 5 total attempts.
+retrying and stopping after 5 total invocations.
 
 ```kotlin
 import com.github.michaelbull.retry.ContinueRetrying
 import com.github.michaelbull.retry.StopRetrying
 import com.github.michaelbull.retry.policy.RetryPolicy
 import com.github.michaelbull.retry.policy.constantDelay
-import com.github.michaelbull.retry.policy.limitAttempts
+import com.github.michaelbull.retry.policy.continueIf
 import com.github.michaelbull.retry.policy.plus
+import com.github.michaelbull.retry.policy.stopAtAttempts
 import com.github.michaelbull.retry.retry
 import kotlinx.coroutines.runBlocking
 import java.sql.SQLDataException
 
-val retryTimeouts: RetryPolicy<Throwable> = {
-    if (reason is SQLDataException) ContinueRetrying else StopRetrying
+val continueOnTimeout = continueIf<Throwable> { (failure) ->
+    failure is SQLDataException
 }
 
 suspend fun printExchangeBetween(a: Long, b: Long) {
@@ -85,7 +86,7 @@ suspend fun printExchangeBetween(a: Long, b: Long) {
 }
 
 fun main() = runBlocking {
-    retry(retryTimeouts + limitAttempts(5) + constantDelay(20)) {
+    retry(continueOnTimeout + constantDelay(20) + stopAtAttempts(5)) {
         printExchangeBetween(1L, 2L)
     }
 }
@@ -109,7 +110,7 @@ Blog entitled ["Exponential Backoff And Jitter"][aws-backoff].
 > ```
 
 ```kotlin
-retry(limitAttempts(5) + binaryExponentialBackoff(base = 10L, max = 5000L)) {
+retry(binaryExponentialBackoff(base = 10L, max = 5000L)) {
     /* code */
 }
 ```
@@ -124,7 +125,7 @@ retry(limitAttempts(5) + binaryExponentialBackoff(base = 10L, max = 5000L)) {
 > ```
 
 ```kotlin
-retry(limitAttempts(5) + fullJitterBackoff(base = 10L, max = 5000L)) {
+retry(fullJitterBackoff(base = 10L, max = 5000L)) {
     /* code */
 }
 ```
@@ -140,7 +141,7 @@ retry(limitAttempts(5) + fullJitterBackoff(base = 10L, max = 5000L)) {
 > ```
 
 ```kotlin
-retry(limitAttempts(5) + equalJitterBackoff(base = 10L, max = 5000L)) {
+retry(equalJitterBackoff(base = 10L, max = 5000L)) {
     /* code */
 }
 ```
@@ -155,7 +156,7 @@ retry(limitAttempts(5) + equalJitterBackoff(base = 10L, max = 5000L)) {
 > ```
 
 ```kotlin
-retry(limitAttempts(5) + decorrelatedJitterBackoff(base = 10L, max = 5000L)) {
+retry(decorrelatedJitterBackoff(base = 10L, max = 5000L)) {
     /* code */
 }
 ```

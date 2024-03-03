@@ -1,80 +1,156 @@
 package com.github.michaelbull.retry.policy
 
-import com.github.michaelbull.retry.retry
+import com.github.michaelbull.retry.attempt.FailedAttempt
+import com.github.michaelbull.retry.instruction.ContinueRetrying
+import com.github.michaelbull.retry.instruction.StopRetrying
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 @ExperimentalCoroutinesApi
 class PredicateTest {
 
-    private val retryIllegalState = retryIf<Throwable> {
-        reason is IllegalStateException
-    }
+    @Test
+    fun `continueIf should continue on specified exception`() {
+        val policy = continueIf<Throwable> { (failure) ->
+            failure is IllegalStateException
+        }
 
-    private val dontRetryOob = retryUnless<Throwable> {
-        reason is IndexOutOfBoundsException
+        val attempt = FailedAttempt<Throwable>(
+            failure = IllegalStateException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(ContinueRetrying, instruction)
     }
 
     @Test
-    fun `retryIf should retry specified exception`() = runBlockingTest {
-        var attempts = 0
-
-        retry(limitAttempts(5) + retryIllegalState) {
-            attempts++
-            if (attempts < 5) {
-                throw IllegalStateException()
-            }
+    fun `continueIf should not continue on unspecified exception`() {
+        val policy = continueIf<Throwable> { (failure) ->
+            failure is IllegalStateException
         }
 
-        assertEquals(5, attempts)
+        val attempt = FailedAttempt<Throwable>(
+            failure = UnsupportedOperationException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(StopRetrying, instruction)
     }
 
     @Test
-    fun `retryIf should not retry unspecified exception`() = runBlockingTest {
-        var attempts = 0
-
-        assertThrows<UnsupportedOperationException> {
-            retry(limitAttempts(5) + retryIllegalState) {
-                attempts++
-                if (attempts < 5) {
-                    throw UnsupportedOperationException()
-                }
-            }
+    fun `continueUnless should not continue on specified exception`() {
+        val policy = continueUnless<Throwable> { (failure) ->
+            failure is IllegalStateException
         }
 
-        assertEquals(1, attempts)
+        val attempt = FailedAttempt<Throwable>(
+            failure = IllegalStateException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(StopRetrying, instruction)
     }
 
     @Test
-    fun `retryUnless should not retry specified exception`() = runBlockingTest {
-        var attempts = 0
-
-        assertThrows<IndexOutOfBoundsException> {
-            retry(limitAttempts(5) + dontRetryOob) {
-                attempts++
-                if (attempts < 5) {
-                    throw IndexOutOfBoundsException()
-                }
-            }
+    fun `continueUnless should continue on unspecified exception`() {
+        val policy = continueUnless<Throwable> { (failure) ->
+            failure is IllegalStateException
         }
 
-        assertEquals(1, attempts)
+        val attempt = FailedAttempt<Throwable>(
+            failure = UnsupportedOperationException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(ContinueRetrying, instruction)
     }
 
     @Test
-    fun `retryUnless should retry unspecified exception`() = runBlockingTest {
-        var attempts = 0
-
-        retry(limitAttempts(5) + dontRetryOob) {
-            attempts++
-            if (attempts < 5) {
-                throw IllegalStateException()
-            }
+    fun `stopIf should stop on specified exception`() {
+        val policy = stopIf<Throwable> { (failure) ->
+            failure is IllegalStateException
         }
 
-        assertEquals(5, attempts)
+        val attempt = FailedAttempt<Throwable>(
+            failure = IllegalStateException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(StopRetrying, instruction)
+    }
+
+    @Test
+    fun `stopIf should not stop on specified exception`() {
+        val policy = stopIf<Throwable> { (failure) ->
+            failure is IllegalStateException
+        }
+
+        val attempt = FailedAttempt<Throwable>(
+            failure = UnsupportedOperationException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(ContinueRetrying, instruction)
+    }
+
+    @Test
+    fun `stopUnless should stop on unspecified exception`() {
+        val policy = stopUnless<Throwable> { (failure) ->
+            failure is IllegalStateException
+        }
+
+        val attempt = FailedAttempt<Throwable>(
+            failure = UnsupportedOperationException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(StopRetrying, instruction)
+    }
+
+    @Test
+    fun `stopUnless should not stop on specified exception`() {
+        val policy = stopUnless<Throwable> { (failure) ->
+            failure is IllegalStateException
+        }
+
+        val attempt = FailedAttempt<Throwable>(
+            failure = IllegalStateException(),
+            number = 0,
+            previousDelay = 0,
+            cumulativeDelay = 0,
+        )
+
+        val instruction = policy(attempt)
+
+        assertEquals(ContinueRetrying, instruction)
     }
 }

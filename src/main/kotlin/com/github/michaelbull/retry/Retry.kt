@@ -1,64 +1,65 @@
 package com.github.michaelbull.retry
 
-import com.github.michaelbull.retry.context.CoroutineRetryScope
-import com.github.michaelbull.retry.context.RetryStatus
-import com.github.michaelbull.retry.context.retryRandom
+import com.github.michaelbull.retry.attempt.Attempt
+import com.github.michaelbull.retry.attempt.firstAttempt
+import com.github.michaelbull.retry.instruction.ContinueRetrying
+import com.github.michaelbull.retry.instruction.RetryInstruction
+import com.github.michaelbull.retry.instruction.StopRetrying
 import com.github.michaelbull.retry.policy.RetryPolicy
-import com.github.michaelbull.retry.policy.constantDelay
-import com.github.michaelbull.retry.policy.limitAttempts
-import com.github.michaelbull.retry.policy.plus
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.coroutines.coroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Runs the [block] of code, following [RetryInstruction]s returned when
- * evaluating the [policy].
+ * Calls the specified function [block] and returns its result is invocation was successful, catching any [Throwable]
+ * exception that was thrown from the [block] function executing and retrying the invocation according to
+ * [instructions][RetryInstruction] from the [policy].
  */
-suspend inline fun <T> retry(
-    noinline policy: RetryPolicy<Throwable> = constantDelay(50) + limitAttempts(5),
-    block: RetryScope.() -> T
-): T {
+suspend inline fun <T> retry(policy: RetryPolicy<Throwable>, block: () -> T): T {
     contract {
-        callsInPlace(policy, InvocationKind.UNKNOWN)
         callsInPlace(block, InvocationKind.AT_LEAST_ONCE)
     }
 
-    val status = RetryStatus()
-    val scope = CoroutineRetryScope(status, coroutineContext.retryRandom)
-
+    var attempt: Attempt? = null
+    var retrying: Boolean
     lateinit var mostRecentFailure: Throwable
 
-    while (true) {
+    do {
         try {
-            return block(scope)
-        } catch (t: Throwable) {
+            return block()
+        } catch (failure: Throwable) {
             /* avoid swallowing CancellationExceptions */
-            if (t is CancellationException) {
-                throw t
+            if (failure is CancellationException) {
+                throw failure
             }
 
-            val failure = DelegatedRetryFailure(t, scope)
-            val instruction = failure.policy()
+            if (attempt == null) {
+                attempt = firstAttempt()
+            }
 
-            status.incrementAttempts()
+            val failedAttempt = attempt.failedWith(failure)
 
-            if (instruction == StopRetrying) {
-                mostRecentFailure = t
-                break
-            } else if (instruction == ContinueRetrying) {
-                status.previousDelay = 0
-                continue
-            } else {
-                val delay = instruction.delayMillis
-                delay(delay)
-                status.previousDelay = delay
-                status.incrementCumulativeDelay(delay)
+            when (val instruction = policy(failedAttempt)) {
+                StopRetrying -> {
+                    mostRecentFailure = failure
+                    retrying = false
+                }
+
+                ContinueRetrying -> {
+                    attempt.retryImmediately()
+                    retrying = true
+                }
+
+                else -> {
+                    val (delayMillis) = instruction
+                    delay(delayMillis)
+                    attempt.retryAfter(delayMillis)
+                    retrying = true
+                }
             }
         }
-    }
+    } while (retrying)
 
     throw mostRecentFailure
 }

@@ -193,10 +193,10 @@ This project is available under the terms of the ISC license. See the
 [`LICENSE`](LICENSE) file for the copyright information and licensing terms.
 
 [github]: https://github.com/michaelbull/kotlin-retry
-[retry]: https://github.com/michaelbull/kotlin-retry/blob/master/src/main/kotlin/com/github/michaelbull/retry/Retry.kt
+[retry]: https://github.com/michaelbull/kotlin-retry/blob/master/kotlin-retry/src/commonMain/kotlin/com/github/michaelbull/retry/Retry.kt
 [innodb-deadlocks]: https://dev.mysql.com/doc/refman/8.0/en/innodb-deadlocks.html
 [postgres-deadlocks]: https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-DEADLOCKS
-[retry-policy]: https://github.com/michaelbull/kotlin-retry/blob/master/src/main/kotlin/com/github/michaelbull/retry/policy/RetryPolicy.kt
+[retry-policy]: https://github.com/michaelbull/kotlin-retry/blob/master/kotlin-retry/src/commonMain/kotlin/com/github/michaelbull/retry/policy/RetryPolicy.kt
 [aws-backoff]: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
 [haskell-retry]: http://hackage.haskell.org/package/retry-0.8.0.1/docs/Control-Retry.html
 

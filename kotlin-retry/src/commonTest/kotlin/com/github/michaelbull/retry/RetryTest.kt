@@ -1,14 +1,18 @@
 package com.github.michaelbull.retry
 
+import com.github.michaelbull.retry.policy.constantDelay
 import com.github.michaelbull.retry.policy.continueIf
 import com.github.michaelbull.retry.policy.plus
 import com.github.michaelbull.retry.policy.stopAtAttempts
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
 class RetryTest {
@@ -96,5 +100,52 @@ class RetryTest {
         }
 
         assertEquals(AttemptsException(15), mostRecentException)
+    }
+
+    @Test
+    fun cancelRetryFromChildJob() = runTest {
+        val policy = constantDelay<Throwable>(20)
+        var attempts = 0
+
+        val job = launch {
+            retry(policy) {
+                attempts++
+
+                if (attempts == 15) {
+                    cancel()
+                } else {
+                    throw AttemptsException(attempts)
+                }
+            }
+        }
+
+        testScheduler.runCurrent()
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(job.isCancelled)
+        assertEquals(15, attempts)
+    }
+
+    @Test
+    fun cancelRetryFromParentJob() = runTest {
+        val policy = constantDelay<Throwable>(100)
+        var attempts = 0
+
+        val job = backgroundScope.launch {
+            retry(policy) {
+                attempts++
+                throw AttemptsException(attempts)
+            }
+        }
+
+        testScheduler.runCurrent()
+        testScheduler.advanceTimeBy(300)
+
+        job.cancel()
+
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(job.isCancelled)
+        assertEquals(3, attempts)
     }
 }

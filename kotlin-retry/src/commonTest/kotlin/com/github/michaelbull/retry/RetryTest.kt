@@ -119,8 +119,13 @@ class RetryTest {
             }
         }
 
-        testScheduler.runCurrent()
         testScheduler.advanceUntilIdle()
+
+        assertTrue(job.isCancelled)
+        assertEquals(15, attempts)
+
+        testScheduler.advanceTimeBy(2000)
+        testScheduler.runCurrent()
 
         assertTrue(job.isCancelled)
         assertEquals(15, attempts)
@@ -138,14 +143,20 @@ class RetryTest {
             }
         }
 
+        testScheduler.advanceTimeBy(350)
         testScheduler.runCurrent()
-        testScheduler.advanceTimeBy(300)
 
         job.cancel()
 
         testScheduler.advanceUntilIdle()
 
         assertTrue(job.isCancelled)
-        assertEquals(3, attempts)
+        assertEquals(4, attempts)
+
+        testScheduler.advanceTimeBy(2000)
+        testScheduler.runCurrent()
+
+        assertTrue(job.isCancelled)
+        assertEquals(4, attempts)
     }
 }

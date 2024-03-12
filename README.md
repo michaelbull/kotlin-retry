@@ -127,7 +127,7 @@ Blog entitled ["Exponential Backoff And Jitter"][aws-backoff].
 > ```
 
 ```kotlin
-retry(binaryExponentialBackoff(base = 10L, max = 5000L)) {
+retry(binaryExponentialBackoff(min = 10L, max = 5000L)) {
     /* code */
 }
 ```
@@ -142,7 +142,7 @@ retry(binaryExponentialBackoff(base = 10L, max = 5000L)) {
 > ```
 
 ```kotlin
-retry(fullJitterBackoff(base = 10L, max = 5000L)) {
+retry(fullJitterBackoff(min = 10L, max = 5000L)) {
     /* code */
 }
 ```
@@ -158,7 +158,7 @@ retry(fullJitterBackoff(base = 10L, max = 5000L)) {
 > ```
 
 ```kotlin
-retry(equalJitterBackoff(base = 10L, max = 5000L)) {
+retry(equalJitterBackoff(min = 10L, max = 5000L)) {
     /* code */
 }
 ```
@@ -173,7 +173,7 @@ retry(equalJitterBackoff(base = 10L, max = 5000L)) {
 > ```
 
 ```kotlin
-retry(decorrelatedJitterBackoff(base = 10L, max = 5000L)) {
+retry(decorrelatedJitterBackoff(min = 10L, max = 5000L)) {
     /* code */
 }
 ```

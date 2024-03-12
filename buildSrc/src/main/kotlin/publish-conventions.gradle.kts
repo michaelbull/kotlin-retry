@@ -1,7 +1,3 @@
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.`maven-publish`
-
 plugins {
     `maven-publish`
     signing
@@ -75,6 +71,11 @@ publishing {
                 contributor {
                     name.set("cherrydev")
                     url.set("https://github.com/cherrydev")
+                }
+
+                contributor {
+                    name.set("Joose Fjällström")
+                    url.set("https://github.com/jfjallstrom")
                 }
             }
 

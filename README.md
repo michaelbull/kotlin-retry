@@ -115,6 +115,41 @@ fun main() = runBlocking {
 }
 ```
 
+## Integration with [kotlin-result][kotlin-result]
+
+If the code you wish to try returns a `Result<V, E>` instead of throwing an
+`Exception`, add the following dependency for access to a Result-based `retry`
+function that shares the same policy code:
+
+```groovy
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.michael-bull.kotlin-retry:kotlin-retry-result:2.0.0")
+}
+```
+
+Usage:
+
+```kotlin
+
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.retry.policy.constantDelay
+import com.github.michaelbull.retry.result.retry
+
+fun somethingThatCanFail(): Result<Int, DomainError> = TODO()
+
+val everyTwoSeconds = constantDelay<DomainError>(2000)
+
+fun main() = runBlocking {
+    val result: Result<Int, DomainError> = retry(everyTwoSeconds) {
+        somethingThatCanFail()
+    }
+}
+```
+
 ## Backoff
 
 The examples above retry executions immediately after they fail, however we may
@@ -205,6 +240,7 @@ This project is available under the terms of the ISC license. See the
 [retry-policy]: https://github.com/michaelbull/kotlin-retry/blob/master/kotlin-retry/src/commonMain/kotlin/com/github/michaelbull/retry/policy/RetryPolicy.kt
 [aws-backoff]: https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
 [haskell-retry]: http://hackage.haskell.org/package/retry-0.8.0.1/docs/Control-Retry.html
+[kotlin-result]: https://github.com/michaelbull/kotlin-result
 
 [badge-android]: http://img.shields.io/badge/-android-6EDB8D.svg?style=flat
 [badge-android-native]: http://img.shields.io/badge/support-[AndroidNative]-6EDB8D.svg?style=flat

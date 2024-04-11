@@ -16,7 +16,7 @@ import com.github.michaelbull.retry.saturatedAdd
  * ```kotlin
  * var attempts = 1
  *
- * retry(limitAttempts(3)) {
+ * retry(stopAtAttempts(3)) {
  *     println(attempts++)
  *     throw RuntimeException()
  * }
@@ -46,7 +46,7 @@ public fun <E> stopAtAttempts(count: Int): RetryPolicy<E> {
  * ```kotlin
  * var attempt = 1
  *
- * retry(limitRetries(3)) {
+ * retry(stopAtRetries(3)) {
  *     println(attempt++)
  *     throw RuntimeException()
  * }

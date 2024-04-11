@@ -151,9 +151,9 @@ class RetryTest {
 
                 if (attempts == 15) {
                     cancel()
-                } else {
-                    throw AttemptsException(attempts)
                 }
+
+                throw AttemptsException(attempts)
             }
         }
 
@@ -170,7 +170,7 @@ class RetryTest {
     }
 
     @Test
-    fun cancelRetryFromWithinChildJob() = runTest {
+    fun cancelRetryWithinChildJob() = runTest {
         val every20ms = constantDelay<Throwable>(20)
         var attempts = 0
 

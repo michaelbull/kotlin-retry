@@ -13,7 +13,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Calls the specified function [block] and returns its result if invocation was successful, catching any [Throwable]
- * exception that was thrown from the [block] function executing and retrying the invocation according to
+ * exception that was thrown from the [block] function execution and retrying the invocation according to
  * [instructions][RetryInstruction] from the [policy].
  */
 public suspend inline fun <T> retry(policy: RetryPolicy<Throwable>, block: () -> T): T {

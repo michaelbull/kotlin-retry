@@ -25,9 +25,10 @@ class RetryTest {
 
     @Test
     fun retryToAttemptLimit() = runTest {
+        val fiveTimes = stopAtAttempts<Throwable>(5)
         var attempts = 0
 
-        retry(stopAtAttempts(5)) {
+        retry(fiveTimes) {
             attempts++
 
             if (attempts < 5) {
@@ -40,10 +41,11 @@ class RetryTest {
 
     @Test
     fun retryExhaustingAttemptLimit() = runTest {
+        val tenTimes = stopAtAttempts<Throwable>(10)
         var attempts = 0
 
         val exception = assertFailsWith<AttemptsException> {
-            retry(stopAtAttempts(10)) {
+            retry(tenTimes) {
                 attempts++
 
                 if (attempts < 15) {
@@ -57,8 +59,10 @@ class RetryTest {
 
     @Test
     fun retryThrowsCancellationException() = runTest {
+        val tenTimes = stopAtAttempts<Throwable>(10)
+
         assertFailsWith<CancellationException> {
-            retry(stopAtAttempts(10)) {
+            retry(tenTimes) {
                 throw CancellationException()
             }
         }
@@ -66,10 +70,11 @@ class RetryTest {
 
     @Test
     fun retryStopsAfterCancellation() = runTest {
+        val fiveTimes = stopAtAttempts<Throwable>(5)
         var attempts = 0
 
         assertFailsWith<CancellationException> {
-            retry(stopAtAttempts(5)) {
+            retry(fiveTimes) {
                 attempts++
 
                 if (attempts == 2) {
@@ -89,13 +94,13 @@ class RetryTest {
             failure is AttemptsException
         }
 
-        val policy = customPolicy + stopAtAttempts(15)
+        val uptoFifteenTimes = customPolicy + stopAtAttempts(15)
 
         var attempts = 0
         lateinit var mostRecentException: Exception
 
         try {
-            retry(policy) {
+            retry(uptoFifteenTimes) {
                 attempts++
                 throw AttemptsException(attempts)
             }
@@ -108,11 +113,11 @@ class RetryTest {
 
     @Test
     fun cancelRetryFromJob() = runTest {
-        val policy = constantDelay<Throwable>(100)
+        val every100ms = constantDelay<Throwable>(100)
         var attempts = 0
 
         val job = backgroundScope.launch {
-            retry(policy) {
+            retry(every100ms) {
                 attempts++
                 throw AttemptsException(attempts)
             }
@@ -137,11 +142,11 @@ class RetryTest {
 
     @Test
     fun cancelRetryWithinJob() = runTest {
-        val policy = constantDelay<Throwable>(20)
+        val every20ms = constantDelay<Throwable>(20)
         var attempts = 0
 
         val job = launch {
-            retry(policy) {
+            retry(every20ms) {
                 attempts++
 
                 if (attempts == 15) {
@@ -166,14 +171,14 @@ class RetryTest {
 
     @Test
     fun cancelRetryFromWithinChildJob() = runTest {
-        val policy = constantDelay<Throwable>(20)
+        val every20ms = constantDelay<Throwable>(20)
         var attempts = 0
 
         lateinit var childJobOne: Deferred<Int>
         lateinit var childJobTwo: Deferred<Int>
 
         val parentJob = launch {
-            retry(policy) {
+            retry(every20ms) {
                 childJobOne = async {
                     delay(100)
                     attempts

@@ -22,7 +22,9 @@
 A multiplatform higher-order function for retrying operations that may fail.
 
 ```kotlin
-retry(constantDelay(delayMillis = 50L) + stopAtAttempts(10)) {
+val everySecondTenTimes = constantDelay(delayMillis = 1000L) + stopAtAttempts(10)
+
+retry(everySecondTenTimes) {
     /* your code */
 }
 ```
@@ -68,8 +70,10 @@ suspend fun printExchangeBetween(a: Long, b: Long) {
     println("$customer1 exchanged with $customer2")
 }
 
+val fiveTimes = stopAtAttempts<Throwable>(5)
+
 fun main() = runBlocking {
-    retry(stopAtAttempts(5)) {
+    retry(fiveTimes) {
         printExchangeBetween(1L, 2L)
     }
 }
@@ -92,18 +96,20 @@ import com.github.michaelbull.retry.retry
 import kotlinx.coroutines.runBlocking
 import java.sql.SQLDataException
 
-val continueOnTimeout = continueIf<Throwable> { (failure) ->
-    failure is SQLDataException
-}
-
 suspend fun printExchangeBetween(a: Long, b: Long) {
     val customer1 = customers.nameFromId(a)
     val customer2 = customers.nameFromId(b)
     println("$customer1 exchanged with $customer2")
 }
 
+val continueOnTimeout = continueIf<Throwable> { (failure) ->
+    failure is SQLDataException
+}
+
+val timeoutsEverySecondFiveTimes = continueOnTimeout + constantDelay(1000) + stopAtAttempts(5)
+
 fun main() = runBlocking {
-    retry(continueOnTimeout + constantDelay(20) + stopAtAttempts(5)) {
+    retry(timeoutsEverySecondFiveTimes) {
         printExchangeBetween(1L, 2L)
     }
 }

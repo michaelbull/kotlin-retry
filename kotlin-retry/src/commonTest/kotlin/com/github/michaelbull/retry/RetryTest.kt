@@ -4,14 +4,18 @@ import com.github.michaelbull.retry.policy.constantDelay
 import com.github.michaelbull.retry.policy.continueIf
 import com.github.michaelbull.retry.policy.plus
 import com.github.michaelbull.retry.policy.stopAtAttempts
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
@@ -103,7 +107,36 @@ class RetryTest {
     }
 
     @Test
-    fun cancelRetryFromChildJob() = runTest {
+    fun cancelRetryFromJob() = runTest {
+        val policy = constantDelay<Throwable>(100)
+        var attempts = 0
+
+        val job = backgroundScope.launch {
+            retry(policy) {
+                attempts++
+                throw AttemptsException(attempts)
+            }
+        }
+
+        testScheduler.advanceTimeBy(350)
+        testScheduler.runCurrent()
+
+        job.cancel()
+
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(job.isCancelled)
+        assertEquals(4, attempts)
+
+        testScheduler.advanceTimeBy(2000)
+        testScheduler.runCurrent()
+
+        assertTrue(job.isCancelled)
+        assertEquals(4, attempts)
+    }
+
+    @Test
+    fun cancelRetryWithinJob() = runTest {
         val policy = constantDelay<Throwable>(20)
         var attempts = 0
 
@@ -132,31 +165,49 @@ class RetryTest {
     }
 
     @Test
-    fun cancelRetryFromParentJob() = runTest {
-        val policy = constantDelay<Throwable>(100)
+    fun cancelRetryFromWithinChildJob() = runTest {
+        val policy = constantDelay<Throwable>(20)
         var attempts = 0
 
-        val job = backgroundScope.launch {
+        lateinit var childJobOne: Deferred<Int>
+        lateinit var childJobTwo: Deferred<Int>
+
+        val parentJob = launch {
             retry(policy) {
-                attempts++
+                childJobOne = async {
+                    delay(100)
+                    attempts
+                }
+
+                childJobTwo = async {
+                    delay(50)
+
+                    if (attempts == 15) {
+                        cancel()
+                    }
+
+                    1
+                }
+
+                attempts = childJobOne.await() + childJobTwo.await()
+
                 throw AttemptsException(attempts)
             }
         }
 
-        testScheduler.advanceTimeBy(350)
-        testScheduler.runCurrent()
-
-        job.cancel()
-
         testScheduler.advanceUntilIdle()
 
-        assertTrue(job.isCancelled)
-        assertEquals(4, attempts)
+        assertTrue(parentJob.isCancelled)
+        assertFalse(childJobOne.isCancelled)
+        assertTrue(childJobTwo.isCancelled)
+        assertEquals(15, attempts)
 
         testScheduler.advanceTimeBy(2000)
         testScheduler.runCurrent()
 
-        assertTrue(job.isCancelled)
-        assertEquals(4, attempts)
+        assertTrue(parentJob.isCancelled)
+        assertFalse(childJobOne.isCancelled)
+        assertTrue(childJobTwo.isCancelled)
+        assertEquals(15, attempts)
     }
 }

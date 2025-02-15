@@ -18,10 +18,13 @@ kotlin {
         nodejs()
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        binaries.executable()
-        nodejs()
+    if (project.name != "kotlin-retry-either") {
+        // arrow-kt is not available for these targets
+        @OptIn(ExperimentalWasmDsl::class)
+        wasmJs {
+            binaries.executable()
+            nodejs()
+        }
     }
 
     /* https://kotlinlang.org/docs/native-target-support.html#tier-1 */
@@ -49,14 +52,18 @@ kotlin {
 
     /* https://kotlinlang.org/docs/native-target-support.html#tier-3 */
 
-    androidNativeArm32()
-    androidNativeArm64()
-    androidNativeX86()
-    androidNativeX64()
+
+    if (project.name != "kotlin-retry-either") {
+        // arrow-kt is not available for these targets
+        androidNativeArm32()
+        androidNativeArm64()
+        androidNativeX86()
+        androidNativeX64()
+
+        watchosDeviceArm64()
+    }
 
     mingwX64()
-
-    watchosDeviceArm64()
 
     sourceSets {
         all {

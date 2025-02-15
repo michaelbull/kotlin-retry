@@ -19,3 +19,4 @@ rootProject.name = "kotlin-retry"
 
 include("kotlin-retry")
 include("kotlin-retry-result")
+include("kotlin-retry-either")

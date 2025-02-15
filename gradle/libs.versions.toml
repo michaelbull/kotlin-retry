@@ -2,6 +2,7 @@
 kotlin = "1.9.22"
 kotlin-coroutines = "1.8.0"
 kotlin-result = "2.0.0"
+arrow = "1.2.4"
 mockk = "1.13.10"
 versions-plugin = "0.51.0"
 
@@ -10,6 +11,7 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlin-result" }
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]

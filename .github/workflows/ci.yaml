@@ -32,25 +32,22 @@ jobs:
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@750cdda3edd6d51b7fdfc069d2e2818cf3c44f4c # v3.3.1
-
-      - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/.konan
           key: "${{ runner.os }}-${{ hashFiles('**/.lock') }}"
 
       - name: Setup JDK
-        uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
-          distribution: temurin
-          java-version: 8
+          distribution: zulu
+          java-version: 11
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@750cdda3edd6d51b7fdfc069d2e2818cf3c44f4c # v3.3.1
+        uses: gradle/actions/setup-gradle@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4.3.1
 
       - name: Build with Gradle Wrapper
         run: ./gradlew ${{ matrix.tasks }}
@@ -66,63 +63,60 @@ jobs:
         include:
           - os: ubuntu-latest
             tasks: >
-              publishAndroidNativeArm32PublicationToMavenRepository
-              publishAndroidNativeArm64PublicationToMavenRepository
-              publishAndroidNativeX64PublicationToMavenRepository
-              publishAndroidNativeX86PublicationToMavenRepository
-              publishJsPublicationToMavenRepository
-              publishJvmPublicationToMavenRepository
-              publishKotlinMultiplatformPublicationToMavenRepository
-              publishLinuxArm64PublicationToMavenRepository
-              publishLinuxX64PublicationToMavenRepository
-              publishWasmJsPublicationToMavenRepository
+              publishAndroidNativeArm32PublicationToMavenCentralRepository
+              publishAndroidNativeArm64PublicationToMavenCentralRepository
+              publishAndroidNativeX64PublicationToMavenCentralRepository
+              publishAndroidNativeX86PublicationToMavenCentralRepository
+              publishJsPublicationToMavenCentralRepository
+              publishJvmPublicationToMavenCentralRepository
+              publishKotlinMultiplatformPublicationToMavenCentralRepository
+              publishLinuxArm64PublicationToMavenCentralRepository
+              publishLinuxX64PublicationToMavenCentralRepository
+              publishWasmJsPublicationToMavenCentralRepository
 
           - os: windows-latest
-            tasks: publishMingwX64PublicationToMavenRepository
+            tasks: publishMingwX64PublicationToMavenCentralRepository
 
           - os: macos-latest
             tasks: >
-              publishIosArm64PublicationToMavenRepository
-              publishIosSimulatorArm64PublicationToMavenRepository
-              publishIosX64PublicationToMavenRepository
-              publishMacosArm64PublicationToMavenRepository
-              publishMacosX64PublicationToMavenRepository
-              publishTvosArm64PublicationToMavenRepository
-              publishTvosSimulatorArm64PublicationToMavenRepository
-              publishTvosX64PublicationToMavenRepository
-              publishWatchosArm32PublicationToMavenRepository
-              publishWatchosArm64PublicationToMavenRepository
-              publishWatchosDeviceArm64PublicationToMavenRepository
-              publishWatchosSimulatorArm64PublicationToMavenRepository
-              publishWatchosX64PublicationToMavenRepository
+              publishIosArm64PublicationToMavenCentralRepository
+              publishIosSimulatorArm64PublicationToMavenCentralRepository
+              publishIosX64PublicationToMavenCentralRepository
+              publishMacosArm64PublicationToMavenCentralRepository
+              publishMacosX64PublicationToMavenCentralRepository
+              publishTvosArm64PublicationToMavenCentralRepository
+              publishTvosSimulatorArm64PublicationToMavenCentralRepository
+              publishTvosX64PublicationToMavenCentralRepository
+              publishWatchosArm32PublicationToMavenCentralRepository
+              publishWatchosArm64PublicationToMavenCentralRepository
+              publishWatchosDeviceArm64PublicationToMavenCentralRepository
+              publishWatchosSimulatorArm64PublicationToMavenCentralRepository
+              publishWatchosX64PublicationToMavenCentralRepository
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@750cdda3edd6d51b7fdfc069d2e2818cf3c44f4c # v3.3.1
-
-      - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/.konan
           key: "${{ runner.os }}-${{ hashFiles('**/.lock') }}"
 
       - name: Setup JDK
-        uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
-          distribution: temurin
-          java-version: 8
+          distribution: zulu
+          java-version: 11
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@750cdda3edd6d51b7fdfc069d2e2818cf3c44f4c # v3.3.1
+        uses: gradle/actions/setup-gradle@06832c7b30a0129d7fb559bcc6e43d26f6374244 # v4.3.1
 
       - name: Publish with Gradle Wrapper
         run: ./gradlew ${{ matrix.tasks }}
         env:
-          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.OSSRH_USERNAME }}
-          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}

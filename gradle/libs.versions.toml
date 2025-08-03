@@ -1,9 +1,9 @@
 [versions]
-kotlin = "1.9.22"
-kotlin-coroutines = "1.8.0"
-kotlin-result = "2.0.0"
+kotlin = "2.2.0"
+kotlin-coroutines = "1.10.2"
+kotlin-result = "2.1.0"
 mockk = "1.13.10"
-versions-plugin = "0.51.0"
+versions-plugin = "0.52.0"
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -13,5 +13,4 @@ kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", versi
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }

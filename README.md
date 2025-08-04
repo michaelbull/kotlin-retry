@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.michael-bull.kotlin-retry:kotlin-retry:2.0.1")
+    implementation("com.michael-bull.kotlin-retry:kotlin-retry:2.0.2")
 }
 ```
 
@@ -127,7 +127,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.michael-bull.kotlin-retry:kotlin-retry-result:2.0.1")
+    implementation("com.michael-bull.kotlin-retry:kotlin-retry-result:2.0.2")
 }
 ```
 

@@ -4,12 +4,21 @@ import com.github.michaelbull.retry.instruction.ContinueRetrying
 import com.github.michaelbull.retry.instruction.RetryAfter
 import com.github.michaelbull.retry.instruction.RetryInstruction
 import com.github.michaelbull.retry.instruction.StopRetrying
+import kotlin.time.Duration
 
 /**
  * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to [RetryAfter] the specified [delayMillis].
  */
 public fun <E> constantDelay(delayMillis: Long): RetryPolicy<E> {
     val instruction = RetryAfter(delayMillis)
+    return RetryPolicy { instruction }
+}
+
+/**
+ * Creates a [RetryPolicy] that returns an [instruction][RetryInstruction] to [RetryAfter] the specified [delay].
+ */
+public fun <E> constantDelay(delay: Duration): RetryPolicy<E> {
+    val instruction = RetryAfter(delay.inWholeMilliseconds)
     return RetryPolicy { instruction }
 }
 

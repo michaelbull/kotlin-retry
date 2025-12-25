@@ -30,3 +30,4 @@ local.properties
 # JVM error logs
 hs_err_pid*.log
 replay_pid*.log
+java_pid*.hprof

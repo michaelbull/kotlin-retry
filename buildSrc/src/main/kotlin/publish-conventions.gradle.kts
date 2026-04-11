@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.SourcesJar
 
 plugins {
     id("com.vanniktech.maven.publish")
@@ -12,8 +13,8 @@ mavenPublishing {
     configure(
         KotlinMultiplatform(
             javadocJar = JavadocJar.Empty(),
-            sourcesJar = true,
-        )
+            sourcesJar = SourcesJar.Sources(),
+        ),
     )
 
     pom {

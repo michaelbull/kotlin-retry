@@ -9,7 +9,7 @@ import kotlin.jvm.JvmInline
  * evaluating a [RetryPolicy].
  */
 @JvmInline
-public value class RetryInstruction @PublishedApi internal constructor(
+public value class RetryInstruction internal constructor(
     public val delayMillis: Long,
 ) {
     public operator fun component1(): Long = delayMillis

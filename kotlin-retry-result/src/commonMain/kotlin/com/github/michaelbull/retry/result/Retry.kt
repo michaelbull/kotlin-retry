@@ -49,7 +49,10 @@ public suspend inline fun <V, E> retry(policy: RetryPolicy<E>, block: () -> Resu
 
                 else -> {
                     val (delayMillis) = instruction
+
+                    @Suppress("ConvertLongToDuration")
                     delay(delayMillis)
+
                     attempt.retryAfter(delayMillis)
                 }
             }

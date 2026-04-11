@@ -19,7 +19,7 @@ class StopTest {
             failure = Unit,
             number = 0,
             previousDelay = 0,
-            cumulativeDelay = 0
+            cumulativeDelay = 0,
         )
 
         val instruction = policy(attempt)
@@ -35,7 +35,7 @@ class StopTest {
             failure = Unit,
             number = 2,
             previousDelay = 100,
-            cumulativeDelay = 300
+            cumulativeDelay = 300,
         )
 
         val instruction = policy(attempt)

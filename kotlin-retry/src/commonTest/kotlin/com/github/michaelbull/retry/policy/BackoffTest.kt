@@ -117,7 +117,7 @@ class BackoffTest {
             RetryAfter(8000L),
             RetryAfter(8000L),
             RetryAfter(8000L),
-            RetryAfter(8000L)
+            RetryAfter(8000L),
         )
 
         val actual = policy.simulate(expected.size, Unit)

@@ -117,7 +117,7 @@ class RetryTest {
         var attempts = 0
 
         val job = backgroundScope.launch {
-            retry(every100ms) {
+            val _ = retry(every100ms) {
                 attempts++
                 Err(AttemptsError(attempts))
             }
@@ -146,7 +146,7 @@ class RetryTest {
         var attempts = 0
 
         val job = launch {
-            retry(every20ms) {
+            val _ = retry(every20ms) {
                 attempts++
 
                 if (attempts == 15) {
@@ -178,7 +178,7 @@ class RetryTest {
         lateinit var childJobTwo: Deferred<Int>
 
         val parentJob = launch {
-            retry(every20ms) {
+            val _ = retry(every20ms) {
                 childJobOne = async {
                     delay(100)
                     attempts

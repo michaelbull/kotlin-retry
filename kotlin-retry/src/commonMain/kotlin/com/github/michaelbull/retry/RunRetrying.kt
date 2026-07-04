@@ -10,6 +10,7 @@ import kotlin.contracts.contract
  * exception that was thrown from the [block] function execution and retrying the invocation according to
  * [instructions][RetryInstruction] from the [policy].
  */
+@IgnorableReturnValue
 public suspend inline fun <T> runRetrying(policy: RetryPolicy<Throwable>, block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.AT_LEAST_ONCE)

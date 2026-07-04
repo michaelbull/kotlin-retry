@@ -16,6 +16,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * exception that was thrown from the [block] function execution and retrying the invocation according to
  * [instructions][RetryInstruction] from the [policy].
  */
+@IgnorableReturnValue
 public suspend inline fun <T> retry(policy: RetryPolicy<Throwable>, block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.AT_LEAST_ONCE)
